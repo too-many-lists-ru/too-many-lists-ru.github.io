@@ -1,6 +1,10 @@
 > # Final Code
 
+# Финальный код
+
 > Alright, that's it for the second list; here's the final code!
+
+Итак, мы дописали второй список, вот финальный код!
 
 ```rust
 pub struct List<T> {
@@ -197,3 +201,5 @@ mod test {
 ```
 
 > Getting beefier!
+
+Обрастаем функционалом!

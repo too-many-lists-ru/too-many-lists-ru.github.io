@@ -16,14 +16,17 @@
 | borrowing            | заимствование                | |
 | box                  | бокс                         | |
 | cache                | кэш                          | |
+| deref coercion       | автоматическое разыменование | |
 | desctructor          | деструктор                   | |
 | deque                | дек                          | |
 | double linked        | двухсвязный                  | |
+| elision              | неявное выведение            | |
 | generics             | обобщения                    | |
 | immutable            | иммутабельный, неизменяемый  | |
 | inherited mutability | наследуемая мутабельность    | |
 | interior mutability  | внутренняя мутабельность     | |
 | intrusive list       | интрузивный список           | |
+| lifetime             | время жизни                  | |
 | mutable              | мутабельный, изменяемый      | |
 | ownership            | владение                     | |
 | pattern matching     | сопоставление с образцом     | |

@@ -1,13 +1,24 @@
-# Iter
+> # Iter
 
-Alright, let's try to implement Iter.
-This time we won't be able to rely on List giving us all the features we want.
-We'll need to roll our own.
-The basic logic we want is to hold a pointer to the current node we want to yield next.
-Because that node may not exist (the list is empty or we're otherwise done iterating), we want that reference to be an Option.
-When we yield an element, we want to proceed to the current node's `next` node.
+# Итератор по ссылкам
 
-Alright, let's try that:
+> Alright, let's try to implement Iter.
+> This time we won't be able to rely on List giving us all the features we want.
+> We'll need to roll our own.
+> The basic logic we want is to hold a pointer to the current node we want to yield next.
+> Because that node may not exist (the list is empty or we're otherwise done iterating), we want that reference to be an Option.
+> When we yield an element, we want to proceed to the current node's `next` node.
+
+Ладно, попробуем реализовать Iter.
+На этот раз мы не можем рассчитывать, что Rust предоставит нам все необходимые функции.
+Нам придётся написать их самим.
+Основная логика, которую мы хотим — держать указатель на текущий узел, который мы собираемся вернуть следующим.
+Поскольку такого узла может и не быть (список пуст или мы завершили итерирование), мы хотим, чтобы наша ссылка была опциональной.
+Когда мы возвращаем элемент, мы хотим продвинуться к узлу `next` текущего узла.
+
+> Alright, let's try that:
+
+Хорошо, давайте попробуем:
 
 ```rust ,ignore
 pub struct Iter<T> {
@@ -48,14 +59,23 @@ error[E0106]: missing lifetime specifier
    |                 ^ expected lifetime parameter
 ```
 
-Oh god.
-Lifetimes.
-I've heard of these things.
-I hear they're a nightmare.
+> Oh god.
+> Lifetimes.
+> I've heard of these things.
+> I hear they're a nightmare.
 
-Let's try something new: see that `error[E0106]` thing?
-That's a compiler error code.
-We can ask rustc to explain those with, well, `--explain`:
+О, боже.
+Время жизни.
+Я слышал про эту штуку.
+Я слышал, что это кошмар.
+
+> Let's try something new: see that `error[E0106]` thing?
+> That's a compiler error code.
+> We can ask rustc to explain those with, well, `--explain`:
+
+Давайте попробуем что-то новое: видите ошибку `error[E0106]`?
+Это код ошибки компилятора.
+Мы можем попросить rustc объяснить её с помощью `--explain`:
 
 ```text
 > rustc --explain E0106
@@ -77,9 +97,13 @@ type MyStr<'a> = &'a str; //correct
 
 ```
 
-That uh... that didn't really clarify much (these docs assume we understand Rust better than we currently do).
-But it looks like we should add those `'a` things to our struct?
-Let's try that.
+> That uh... that didn't really clarify much (these docs assume we understand Rust better than we currently do).
+> But it looks like we should add those `'a` things to our struct?
+> Let's try that.
+
+Так, хм... Это не очень прояснило ситуацию (эта документация думает, что мы разбираемся в Rust намного лучше, чем мы на самом деле разбираемся).
+Но разве всё не звучит так, что мы должны добавить эти `'a` к нашей структуре?
+Давайте попробуем.
 
 ```rust ,ignore
 pub struct Iter<'a, T> {
@@ -105,7 +129,9 @@ error[E0106]: missing lifetime specifier
 error: aborting due to 2 previous errors
 ```
 
-Alright I'm starting to see a pattern here... let's just add these little guys to everything we can:
+> Alright I'm starting to see a pattern here... let's just add these little guys to everything we can:
+
+Так, я начинаю видеть закономерность... давайте просто добавим этих малышей везде, где сможем:
 
 ```rust ,ignore
 pub struct Iter<'a, T> {
@@ -151,75 +177,134 @@ error[E0063]: missing field `next` in initializer of `second::Iter<'_, _>`
    |         ^^^^ missing `next`
 ```
 
-Oh god.
-We broke Rust.
+> Oh god.
+> We broke Rust.
 
-Maybe we should actually figure out what the heck this `'a` lifetime stuff even means.
+Боже.
+Мы сломали Rust.
 
-Lifetimes can scare off a lot of people because they're a change to something we've known and loved since the dawn of programming.
-We've actually managed to dodge lifetimes so far, even though they've been tangled throughout our programs this whole time.
+> Maybe we should actually figure out what the heck this `'a` lifetime stuff even means.
 
-Lifetimes are unnecessary in garbage collected languages because the garbage collector ensures that everything magically lives as long as it needs to.
-Most data in Rust is *manually* managed, so that data needs another solution.
-C and C++ give us a clear example what happens if you just let people take pointers to random data on the stack: pervasive unmanageable unsafety.
-This can be roughly separated into two classes of error:
+Может быть, нам всё-таки пора разобраться, что за хрень это самое время жизни `'a`?
 
-* Holding a pointer to something that went out of scope
-* Holding a pointer to something that got mutated away
+> Lifetimes can scare off a lot of people because they're a change to something we've known and loved since the dawn of programming.
+> We've actually managed to dodge lifetimes so far, even though they've been tangled throughout our programs this whole time.
 
-Lifetimes solve both of these problems, and 99% of the time, they do this in a totally transparent way.
+Время жизни может отпугнуть многих, потому что она меняет что-то, что мы знали и любили с начала программистских времён.
+Нам до сих пор удавалось избегать упоминания времени жизни, не смотря на то, что оно было тесно вплетено в наши программы всё это время.
 
-So what's a lifetime?
+> Lifetimes are unnecessary in garbage collected languages because the garbage collector ensures that everything magically lives as long as it needs to.
+> Most data in Rust is *manually* managed, so that data needs another solution.
+> C and C++ give us a clear example what happens if you just let people take pointers to random data on the stack: pervasive unmanageable unsafety.
+> This can be roughly separated into two classes of error:
 
-Quite simply, a lifetime is the name of a region (\~block/scope) of code somewhere in a program.
-That's it.
-When a reference is tagged with a lifetime, we're saying that it has to be valid for that *entire* region.
-Different things place requirements on how long a reference must and can be valid for.
-The entire lifetime system is in turn just a constraint-solving system that tries to minimize the region of every reference.
-If it successfully finds a set of lifetimes that satisfies all the constraints, your program compiles!
-Otherwise you get an error back saying that something didn't live long enough.
+В языках программирования со сборкой мусора время жизни не требуется, поскольку сборщик мусора гарантирует, что все объекты будут волшебным образом жить столько, сколько нужно.
+Большинство данных в Rust *управляется* вручную, поэтому для них нужно другое решение.
+C и C++ дают нам ясный пример, что происходит, если вы просто даёте людям возможность указывать на произвольные данные в стеке: повсеместная неуправляемая небезопасность.
+Эти ошибки можно условно разделить на два класса:
 
-Within a function body you generally can't talk about lifetimes, and wouldn't want to *anyway*.
-The compiler has full information and can infer all the constraints to find the minimum lifetimes.
-However at the type and API-level, the compiler *doesn't* have all the information.
-It requires you to tell it about the relationship between different lifetimes so it can figure out what you're doing.
+> * Holding a pointer to something that went out of scope
+> * Holding a pointer to something that got mutated away
 
-In principle, those lifetimes *could* also be left out, but then checking all the borrows would be a huge whole-program analysis that would produce mind-bogglingly non-local errors.
-Rust's system means all borrow checking can be done in each function body independently, and all your errors should be fairly local (or your types have incorrect signatures).
+* Указатель на что-то, чего больше не существует
+* Указатель на что-то, что было кем-то изменено
 
-But we've written references in function signatures before, and it was fine!
-That's because there are certain cases that are so common that Rust will automatically pick the lifetimes for you.
-This is *lifetime elision*.
+> Lifetimes solve both of these problems, and 99% of the time, they do this in a totally transparent way.
 
-In particular:
+Время жизни решает обе эти проблемы и в 99% времени делает это совершенно прозрачным образом.
+
+> So what's a lifetime?
+
+Так что ж такое время жизни?
+
+> Quite simply, a lifetime is the name of a region (\~block/scope) of code somewhere in a program.
+> That's it.
+> When a reference is tagged with a lifetime, we're saying that it has to be valid for that *entire* region.
+> Different things place requirements on how long a reference must and can be valid for.
+> The entire lifetime system is in turn just a constraint-solving system that tries to minimize the region of every reference.
+> If it successfully finds a set of lifetimes that satisfies all the constraints, your program compiles!
+> Otherwise you get an error back saying that something didn't live long enough.
+
+Говоря простыми словами, время жизни — это название участка (блока/области видимости) кода где-то в программе.
+Вот и всё.
+Когда ссылка помечена временем жизни, мы говорим, что она должна быть действительной на *всём* этом участке.
+То, как долго ссылка должна быть и может быть действительна, зависит от множества вещей.
+Вся система управления временем жизни в свою очередь представляет собой систему решения ограничений, которая пытается минимизировать участок, где каждая ссылка действительна.
+Если ей удаётся найти множество времён жизни, которые удовлетворяют всем ограничениям, ваша программа компилируется!
+В противном случае вы получаете ошибку, которая утверждает, что что-то живёт недостаточно долго.
+
+> Within a function body you generally can't talk about lifetimes, and wouldn't want to *anyway*.
+> The compiler has full information and can infer all the constraints to find the minimum lifetimes.
+> However at the type and API-level, the compiler *doesn't* have all the information.
+> It requires you to tell it about the relationship between different lifetimes so it can figure out what you're doing.
+
+Нет смысла говорить о времени жизни внутри функции, да и *в любом случае*, в этом нет необходимости.
+У компилятора есть полная информация, чтобы выести все ограничения для определения минимального времени жизни.
+Тем не мнее, на уровне типов и API, у компилятора *нет* всей информации.
+Он требует, чтобы вы рассказали ему о взаимоотношениях между различными временами жизин, чтобы он мог разобраться, что вы делаете.
+
+> In principle, those lifetimes *could* also be left out, but then checking all the borrows would be a huge whole-program analysis that would produce mind-bogglingly non-local errors.
+> Rust's system means all borrow checking can be done in each function body independently, and all your errors should be fairly local (or your types have incorrect signatures).
+
+В приципе, все эти временами жизни *можно было бы* опустить, но тогда проверка всех заимствований привела бы к огромному анализу на уровне всей программы, что привело бы к умопомрачительным нелокальным ошибкам.
+Система Rust предполагает, что все проверки заимствования могут быть выполнены независимо для каждой функции, и все ваши ошибки должны быть довольно локальными (или у ваших типов некорректные сигнатуры).
+
+> But we've written references in function signatures before, and it was fine!
+> That's because there are certain cases that are so common that Rust will automatically pick the lifetimes for you.
+> This is *lifetime elision*.
+
+Но мы и раньше писали ссылки в сигнатурах функций, и всё было нормально!
+Это работает потому, что есть несколько случаев, которые настолько распространены, что Rust автоматически выводит время жизни за вас.
+Это *неявное выведение времени жизни*.
+
+> In particular:
+
+В частности:
 
 ```rust ,ignore
 // Only one reference in input, so the output must be derived from that input
-fn foo(&A) -> &B; // sugar for:
+// Только одна ссылка на входе, так что выход можно вывести из входа
+fn foo(&A) -> &B; // sugar for: сахар для:
 fn foo<'a>(&'a A) -> &'a B;
 
 // Many inputs, assume they're all independent
-fn foo(&A, &B, &C); // sugar for:
+// Много ссылка на входе, предполагаем, что все они независимы
+fn foo(&A, &B, &C); // sugar for: сахар для:
 fn foo<'a, 'b, 'c>(&'a A, &'b B, &'c C);
 
 // Methods, assume all output lifetimes are derived from `self`
-fn foo(&self, &B, &C) -> &D; // sugar for:
+// Метод, выводим все времена жизни на выходе из `self`.
+fn foo(&self, &B, &C) -> &D; // sugar for: сахар для:
 fn foo<'a, 'b, 'c>(&'a self, &'b B, &'c C) -> &'a D;
 ```
 
-So what does `fn foo<'a>(&'a A) -> &'a B` *mean*?
-In practical terms, all it means is that the input must live at least as long as the output.
-So if you keep the output around for a long time, this will expand the region that the input must be valid for.
-Once you stop using the output, the compiler will know it's ok for the input to become invalid too.
+> So what does `fn foo<'a>(&'a A) -> &'a B` *mean*?
+> In practical terms, all it means is that the input must live at least as long as the output.
+> So if you keep the output around for a long time, this will expand the region that the input must be valid for.
+> Once you stop using the output, the compiler will know it's ok for the input to become invalid too.
 
-With this system set up, Rust can ensure nothing is used after free, and nothing is mutated while outstanding references exist.
-It just makes sure the constraints all work out!
+Итак, что *значит* `fn foo<'a>(&'a A) -> &'a B`?
+На практике это значит всего лишь, что переменная на входе должна жить по крайней мере столько же, сколько и переменная на выходе.
+Таким образом, если хранить выходные данные в течение длительного времени, это расширит участок, в котором должны быть действительно входные данные.
+Как только вы прекращаете использовать выходную переменную, компилятор понимает, что входная переменная тоже стала недействительной.
 
-Alright.
-So.
+> With this system set up, Rust can ensure nothing is used after free, and nothing is mutated while outstanding references exist.
+> It just makes sure the constraints all work out!
+
+Благодаря такой системе Rust гарантирует, что ничего не может быть использовано после освобождения, и ничего не может быть изменено, пока на него ссылаются внешние ссылки.
+Это просто гарантирует, что все ограничения соблюдаются!
+
+> Alright.
+> So.
+> Iter.
+
+Хорошо.
+Так.
 Iter.
 
-Let's roll back to the no lifetimes state:
+> Let's roll back to the no lifetimes state:
+
+Давайте откатимся к коду без указания времени жизни:
 
 ```rust ,ignore
 pub struct Iter<T> {
@@ -243,31 +328,42 @@ impl<T> Iterator for Iter<T> {
 }
 ```
 
-We need to add lifetimes only in function and type signatures:
+> We need to add lifetimes only in function and type signatures:
+
+Мы должны добавить времена жизни только в сигнатуры функций и типов:
 
 ```rust ,ignore
 // Iter is generic over *some* lifetime, it doesn't care
+// Iter это обобщённый тип на протяжении какой-то времени жизни, неважно какого
 pub struct Iter<'a, T> {
     next: Option<&'a Node<T>>,
 }
 
 // No lifetime here, List doesn't have any associated lifetimes
+// Никакого врмени жизни здесь, у List нет никаких связанных времён жизни
 impl<T> List<T> {
     // We declare a fresh lifetime here for the *exact* borrow that
     // creates the iter. Now &self needs to be valid as long as the
     // Iter is around.
+    // Здесь мы объявляем новое время жизни для заимствования, чтобы
+    // создать итератор. Сейчас &self должен оставаться действительным до тех
+    // пор, пока существует Iter.
     pub fn iter<'a>(&'a self) -> Iter<'a, T> {
         Iter { next: self.head.map(|node| &node) }
     }
 }
 
 // We *do* have a lifetime here, because Iter has one that we need to define
+// Нам *нужно* время жизни здесь, потому что у Iter оно есть
 impl<'a, T> Iterator for Iter<'a, T> {
     // Need it here too, this is a type declaration
+    // Здесь тоже нужно, поскольку это декларация типа
     type Item = &'a T;
 
     // None of this needs to change, handled by the above.
     // Self continues to be incredibly hype and amazing
+    // Здесь ничего менять не нужно, всё будет работать, как и раньше
+    // Self всё ещё невероятно чудесен и хайпов
     fn next(&mut self) -> Option<Self::Item> {
         self.next.map(|node| {
             self.next = node.next.map(|node| &node);
@@ -277,7 +373,9 @@ impl<'a, T> Iterator for Iter<'a, T> {
 }
 ```
 
-Alright, I think we got it this time y'all.
+> Alright, I think we got it this time y'all.
+
+Ладно, думаю, на этот раз у нас получилось.
 
 ```text
 cargo build
@@ -303,12 +401,19 @@ error[E0308]: mismatched types
 
 (╯°□°)╯︵ ┻━┻
 
-OK.
-SO.
-We fixed our lifetime errors but now we're getting some new type errors.
+> OK.
+> SO.
+> We fixed our lifetime errors but now we're getting some new type errors.
 
-We want to be storing `&Node`'s, but we're getting `&Box<Node>`s.
-Ok, that's easy enough, we just need to dereference the Box before we take our reference:
+Так.
+Хорошо.
+Мы исправили ошибки с временем жизни, но теперь у нас появился новый тип ошибок.
+
+> We want to be storing `&Node`'s, but we're getting `&Box<Node>`s.
+> Ok, that's easy enough, we just need to dereference the Box before we take our reference:
+
+Нам нужны `&Node`, но у нас есть только `&Box<Node>`.
+Ладно, это достаточно просто, мы всего лишь должны разыменовать бокс, чтобы получить нашу ссылку:
 
 ```rust ,ignore
 impl<T> List<T> {
@@ -358,7 +463,9 @@ error[E0507]: cannot move out of borrowed content
 
 (ﾉಥ益ಥ）ﾉ﻿ ┻━┻
 
-We forgot `as_ref`, so we're moving the box into `map`, which means it would be dropped, which means our references would be dangling:
+> We forgot `as_ref`, so we're moving the box into `map`, which means it would be dropped, which means our references would be dangling:
+
+Мы забыли вызвать `as_ref`, так что мы переносим бокс в `map`, что означает, что он будет удалён, что означает, что наши ссылки станут висячими (перестанут ссылаться на реальный объект).
 
 ```rust ,ignore
 pub struct Iter<'a, T> {
@@ -408,7 +515,9 @@ error[E0308]: mismatched types
 
 😭
 
-`as_ref` added another layer of indirection we need to remove:
+> `as_ref` added another layer of indirection we need to remove:
+
+`as_ref` добавил ещё один уровень косвенности, который мы должны убрать:
 
 
 ```rust ,ignore
@@ -441,35 +550,57 @@ cargo build
 
 🎉 🎉 🎉
 
-The as_deref and as_deref_mut functions are stable as of Rust 1.40.
-Before that you would need to do `map(|node| &**node)` and `map(|node| &mut**node)`.
-You may be thinking "wow that `&**` thing is really janky", and you're not wrong, but like a fine wine Rust gets better over time and we no longer need to do such.
-Normally Rust is very good at doing this kind of conversion implicitly, through a process called *deref coercion*, where basically it can insert \*'s throughout your code to make it type-check.
-It can do this because we have the borrow checker to ensure we never mess up pointers!
+> The as_deref and as_deref_mut functions are stable as of Rust 1.40.
+> Before that you would need to do `map(|node| &**node)` and `map(|node| &mut**node)`.
+> You may be thinking "wow that `&**` thing is really janky", and you're not wrong, but like a fine wine Rust gets better over time and we no longer need to do such.
+> Normally Rust is very good at doing this kind of conversion implicitly, through a process called *deref coercion*, where basically it can insert \*'s throughout your code to make it type-check.
+> It can do this because we have the borrow checker to ensure we never mess up pointers!
 
-But in this case the closure in conjunction with the fact that we have an `Option<&T>` instead of `&T` is a bit too complicated for it to work out, so we need to help it by being explicit.
-Thankfully this is pretty rare, in my experience.
+Функции as_deref и as_deref_mut стабильны, начиная с Rust 1.40.
+До этого вам надо было писать `map(|node| &**node)` и `map(|node| &mut**node)`.
+Вам может показаться, что эта штука с `&**` действительно корявая, и в этом вы не ошибаетесь, но, как и хорошее вино, Rust со временем становится только лучше и нам больше не нужно так делать.
+Обычно Rust очень хорошо справляется с такими преобразованиями неявно, посредством процесса, называемого *автоматическим разыменованием* (deref coercion), при котором он может вставлять \* по всему коду для, чтобы код прошёл проверку типов.
+Это работает благодаря проверке заимствований, которая гарантирует, что мы никогда не сломаем указатели!
 
-Just for completeness' sake, we *could* give it a *different* hint with the *turbofish*:
+> But in this case the closure in conjunction with the fact that we have an `Option<&T>` instead of `&T` is a bit too complicated for it to work out, so we need to help it by being explicit.
+> Thankfully this is pretty rare, in my experience.
+
+Но в нашем случае замыкание в сочетании с тем фактом, что у нас есть `Option<&T>` вместо `&T`, слишком сложно, чтобы всё заработало, так что нам надо явно указать время жизни.
+К счастью, по моему опыту, так случается довольно редко.
+
+> Just for completeness' sake, we *could* give it a *different* hint with the *turbofish*:
+
+Для полноты картины: мы *могли бы* дать *другую* подсказку с помощью оператора `::<>` который на сленге называют *турборыбой*:
 
 ```rust ,ignore
     self.next = node.next.as_ref().map::<&Node<T>, _>(|node| &node);
 ```
 
-See, map is a generic function:
+> See, map is a generic function:
+
+Смотрите, `map` — это обобщённая функция:
 
 ```rust ,ignore
 pub fn map<U, F>(self, f: F) -> Option<U>
 ```
 
-The turbofish, `::<>`, lets us tell the compiler what we think the types of those generics should be.
-In this case `::<&Node<T>, _>` says "it should return a `&Node<T>`, and I don't know/care about that other type".
+> The turbofish, `::<>`, lets us tell the compiler what we think the types of those generics should be.
+> In this case `::<&Node<T>, _>` says "it should return a `&Node<T>`, and I don't know/care about that other type".
 
-This in turn lets the compiler know that `&node` should have deref coercion applied to it, so we don't need to manually apply all those \*'s!
+Турборыба `::<>` позволяет нам сообщить компилятору, какими, как нам кажется, должны быть обобщённые типы.
+В данном случае `::<&Node<T>, _>` говорит «функция должна вернуть `&Node<T>`, а другой тип меня не волнует».
 
-But in this case I don't think it's really an improvement, this was just a thinly veiled excuse to show off deref coercion and the sometimes-useful turbofish. 😅
+> This in turn lets the compiler know that `&node` should have deref coercion applied to it, so we don't need to manually apply all those \*'s!
 
-Let's write a test to be sure we didn't no-op it or anything:
+Это в свою очередь сообщает компилятору, что к `&node` следует применить автоматическое разыменование, так что нам не надо вручную писать все эти \*!
+
+> But in this case I don't think it's really an improvement, this was just a thinly veiled excuse to show off deref coercion and the sometimes-useful turbofish. 😅
+
+Но в данном случае я не думаю, что так следует писать, это был всего лишь плохо завуалированный предлог, чтобы рассказать про автоматическое разыменование и время от времени полезную турборыбу. 😅
+
+> Let's write a test to be sure we didn't no-op it or anything:
+
+Давайте напишем тест, чтобы убедиться, что мы всё сделали правильно и не оставили без внимания ничего важного:
 
 ```rust ,ignore
 #[test]
@@ -500,9 +631,13 @@ test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured
 
 ```
 
-Heck yeah.
+> Heck yeah.
 
-Finally, it should be noted that we *can* actually apply lifetime elision here:
+Блин, да.
+
+> Finally, it should be noted that we *can* actually apply lifetime elision here:
+
+Наконец, следует заметить, что здесь мы действительно *можем* использовать неявное выведение времени жизни:
 
 ```rust ,ignore
 impl<T> List<T> {
@@ -512,7 +647,9 @@ impl<T> List<T> {
 }
 ```
 
-is equivalent to:
+> is equivalent to:
+
+эквивалентно:
 
 ```rust ,ignore
 impl<T> List<T> {
@@ -522,9 +659,13 @@ impl<T> List<T> {
 }
 ```
 
-Yay fewer lifetimes!
+> Yay fewer lifetimes!
 
-Or, if you're not comfortable "hiding" that a struct contains a lifetime, you can use the Rust 2018 "explicitly elided lifetime" syntax,  `'_`:
+Ура, меньше времён жизни!
+
+> Or, if you're not comfortable "hiding" that a struct contains a lifetime, you can use the Rust 2018 "explicitly elided lifetime" syntax,  `'_`:
+
+Или, если вам некомфортно «скрывать», что у структуры есть время жизни, мы можете использовать синтаксис «явно пропущенного времени жизни» `'_`, который появился в Rust 2018.
 
 ```rust ,ignore
 impl<T> List<T> {
