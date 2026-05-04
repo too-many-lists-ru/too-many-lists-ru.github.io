@@ -1,6 +1,10 @@
 > # The Final Code
 
+# Финальный код
+
 > Alright, 6000 words later, here's all the code we managed to actually write:
+
+Итак, 6000 слов спустя, вот код, который нам удалось написать:
 
 ```rust
 use std::mem;
@@ -92,3 +96,8 @@ mod test {
 > Geez.
 > 80 lines, and half of it was tests!
 > Well, I did say this first one was going to take a while!
+
+Только посмотрите!
+<!-- https://www.urbandictionary.com/define.php?term=Geez == "take a quick look at" -->
+80 строк, из них половина — тесты!
+Ну, я предупреждал, что первая глава займёт какое-то время!
