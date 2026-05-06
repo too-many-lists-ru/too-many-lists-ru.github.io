@@ -1,7 +1,12 @@
 > # Final Code
 
+# Финальный код
+
 > That's all I really have to say on the immutable stack.
 > We're getting pretty good at implementing lists now!
+
+Это всё, что я реально хотел сказать об иммутабельном стеке.
+Мы уже неплохо освоили работу со списками!
 
 ```rust
 use std::rc::Rc;
