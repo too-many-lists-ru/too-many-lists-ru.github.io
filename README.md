@@ -1,4 +1,4 @@
-# Прорва односвязных списков, чтобы выучить Rust
+# Целая прорва односвязных списков, чтобы выучить Rust
 
 Перевод книги [Learning Rust With Entirely Too Many Linked Lists](https://github.com/rust-unofficial/too-many-lists).
 
