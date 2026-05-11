@@ -1,8 +1,14 @@
 > # Symmetric Junk
 
+# Симметричный мусор
+
 > Alright let's get all that combinatoric symmetry over with.
 
+Что ж, давайте разберёмся со всей этой комбинаторной симметрией.
+
 > All we have to do is some basic text replacement:
+
+Всё, что нам нужно, это выполнить простую замену текста:
 
 ```text
 tail <-> head
@@ -11,6 +17,8 @@ front -> back
 ```
 
 > Oh, also we need to add `_mut` variants for peeking.
+
+О, нам также надо написать варианты `_mut` для методов `peek`.
 
 ```rust ,ignore
 use std::cell::{Ref, RefCell, RefMut};
@@ -68,6 +76,7 @@ pub fn peek_front_mut(&mut self) -> Option<RefMut<T>> {
 
 > And massively flesh out our tests:
 
+И значительно расширить наши тесты:
 
 ```rust ,ignore
 #[test]
@@ -147,6 +156,12 @@ fn peek() {
 > The combinatoric space has really blown up here.
 > Our code is at very least not *obviously wrong*.
 
+Есть ли сценарии, которые мы не протестировали?
+Возможно.
+Комбинаторное пространство действительно здесь разрослось.
+<!-- Количество комбинаций методов действительно стало стало очень большим  -->
+По крайней мере, наш код не *явно ошибочный*.
+
 ```text
 > cargo test
 
@@ -170,3 +185,6 @@ test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured
 
 > Nice.
 > Copy-pasting is the best kind of programming.
+
+Прекрасно.
+Копи-паста — лучший способ программирования.
