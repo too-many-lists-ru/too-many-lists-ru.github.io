@@ -34,10 +34,6 @@ list -> A -> B -> C
 Возможно, кое-кто из вас занервничал.
 Это рекурсивный код, а рекурсивный код может привести к переполнению стека!
 
-> Some of you might be thinking "this is clearly tail recursive, and any decent language would ensure that such code wouldn't blow the stack".
-> This is, in fact, incorrect!
-> To see why, let's try to write what the compiler has to do, by manually implementing Drop for our List as the compiler would:
-
 Некоторые из вас, возможно, подумали: «здесь точно хвостовая рекурсия, а любой приличный язык программирования гарантирует, что при хвостовой рекурсии переполнения не будет».
 На самом деле это неверно!
 Чтобы понять, почему, давайте вручную реализуем Drop так, как это сделал бы компилятор:
