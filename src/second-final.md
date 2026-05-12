@@ -1,10 +1,6 @@
-> # Final Code
-
 # Финальный код
 
-> Alright, that's it for the second list; here's the final code!
-
-Итак, мы дописали второй список, вот финальный код!
+Итак, мы дописали второй список и вот финальный код!
 
 ```rust
 pub struct List<T> {
@@ -78,7 +74,7 @@ pub struct IntoIter<T>(List<T>);
 impl<T> Iterator for IntoIter<T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
-        // access fields of a tuple struct numerically
+        // получаем доступ к полям кортежа по номеру
         self.0.pop()
     }
 }
@@ -120,27 +116,27 @@ mod test {
     fn basics() {
         let mut list = List::new();
 
-        // Check empty list behaves right
+        // Проверяем, что пустой список ведёт себя правильно
         assert_eq!(list.pop(), None);
 
-        // Populate list
+        // Заполняем список
         list.push(1);
         list.push(2);
         list.push(3);
 
-        // Check normal removal
+        // Проверяем обычное удаление
         assert_eq!(list.pop(), Some(3));
         assert_eq!(list.pop(), Some(2));
 
-        // Push some more just to make sure nothing's corrupted
+        // Вставляем новые значения, просто чтобы проверить, что ничего не сломается
         list.push(4);
         list.push(5);
 
-        // Check normal removal
+        // Проверяем обычное удаление
         assert_eq!(list.pop(), Some(5));
         assert_eq!(list.pop(), Some(4));
 
-        // Check exhaustion
+        // Проверяем граничный случай
         assert_eq!(list.pop(), Some(1));
         assert_eq!(list.pop(), None);
     }
@@ -199,7 +195,5 @@ mod test {
 }
 
 ```
-
-> Getting beefier!
 
 Обрастаем функционалом!
