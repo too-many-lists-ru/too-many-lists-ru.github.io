@@ -50,10 +50,6 @@ error[E0308]: mismatched types
               found type `()`
 ```
 
-> Whoops, `pop` has to return a value, and we're not doing that yet.
-> We *could* return `None`, but in this case it's probably a better idea to return `unimplemented!()`, to indicate that we aren't done implementing the function.
-> `unimplemented!()` is a macro (`!` indicates a macro) that panics the program when we get to it (\~crashes it in a controlled manner).
-
 Ой, `pop` должна вернуть значение, но этого мы пока не написали.
 Мы *могли бы* вернуть `None`, но, возможно в данном случае лучше вернуть `unimplemented!()`, чтобы показать, что мы ещё не завершили реализацию функции.
 `unimplemented!()` — это макрос (`!` указывает на макрос), который вызывает панику, когда к нему обращаются.

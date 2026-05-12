@@ -53,8 +53,6 @@ error[E0072]: recursive type `first::List` has infinite size
 Ну.
 Не знаю, как вы, а я определённо чувствую себя преданной всем сообществом функциональных программистов.
 
-> If we actually check out the error message (after we get over the whole betrayal thing), we can see that rustc is actually telling us exactly how to solve this problem:
-
 Подумав над сообщеним об ошибке (после того, как переживём всю эту историю с предательством), мы обнаружим, что rustc на самом деле подсказывает нам, как решить нашу проблему:
 
 > insert indirection (e.g., a `Box`, `Rc`, or `&`) at some point to make `first::List` representable
@@ -183,10 +181,6 @@ enum Foo {
 Это значит, что хотя `Empty` хранит один бит информации, он в любом случае резервирует место для указателя и элемента, поскольку в любой момент может превратиться в `Elem`.
 Поэтому в первом сценарии в куче хранится дополнительный элемент, где полезным является один бит, а всё остальное — мусор.
 Во втором сценарии последний узел содержит нулевой указатель, который означает конец списка, то есть, не является мусором.
-
-> One of our nodes not being allocated at all is also, perhaps surprisingly, *worse* than always allocating it.
-> This is because it gives us a *non-uniform* node layout.
-> This doesn't have much of an appreciable effect on pushing and popping nodes, but it does have an effect on splitting and merging lists.
 
 Один из узлов вообще не размещается в куче и это, как ни странно, *не очень хорошо*.
 Причина — в *неунифицированном* размещении узлов (часть узлов хранится одним способм, а часть — другим).
@@ -318,12 +312,6 @@ warning: private type `first::Node` in public interface (error E0446)
 
 :(
 
-> Rust is mad at us again.
-> We marked the `List` as public (because we want people to be able to use it), but not the `Node`.
-> The problem is that the internals of an `enum` are totally public, and we're not allowed to publicly talk about private types.
-> We could make all of `Node` totally public, but generally in Rust we favour keeping implementation details private.
-> Let's make `List` a struct, so that we can hide the implementation details:
-
 Rust снова сердится — и всё по нашей вине.
 Мы сделали `List` публичным (чтобы люди могли его использовать), а `Node` — нет.
 Проблема в том, что внутренности `enum` публичны и там, по идее, не должно быть приватных типов.
@@ -386,7 +374,6 @@ warning: field is never used: `next`
 
 ```
 
-> Alright, that compiled!я!
 Rust выводит множество предупрежний, потому что, насколько он может судить, мы написали совершенно бесполезный код.
 Мы не используем `head` и никто из пользователей нашей библиотекой не может этого сделать, потому что это приватное поле.
 Транзитивно это значит, что List и Node тоже никто не испольует.
