@@ -1,10 +1,6 @@
-> # The Final Code
-
 # Финальный код
 
-> Alright, 6000 words later, here's all the code we managed to actually write:
-
-Итак, 6000 слов спустя, вот код, который нам удалось написать:
+Итак, 6000 слов спустя, мы написали такой код:
 
 ```rust
 use std::mem;
@@ -66,38 +62,33 @@ mod test {
     fn basics() {
         let mut list = List::new();
 
-        // Check empty list behaves right
+        // Проверяем, что пустой список ведёт себя правильно
         assert_eq!(list.pop(), None);
 
-        // Populate list
+        // Заполняем список
         list.push(1);
         list.push(2);
         list.push(3);
 
-        // Check normal removal
+        // Проверяем обычное удаление
         assert_eq!(list.pop(), Some(3));
         assert_eq!(list.pop(), Some(2));
 
-        // Push some more just to make sure nothing's corrupted
+        // Вставляем новые значения, просто чтобы проверить, что ничего не сломается
         list.push(4);
         list.push(5);
 
-        // Check normal removal
+        // Проверяем обычное удаление
         assert_eq!(list.pop(), Some(5));
         assert_eq!(list.pop(), Some(4));
 
-        // Check exhaustion
+        // Проверяем граничный случай
         assert_eq!(list.pop(), Some(1));
         assert_eq!(list.pop(), None);
     }
 }
 ```
 
-> Geez.
-> 80 lines, and half of it was tests!
-> Well, I did say this first one was going to take a while!
-
 Только посмотрите!
-<!-- https://www.urbandictionary.com/define.php?term=Geez == "take a quick look at" -->
 80 строк, из них половина — тесты!
-Ну, я предупреждал, что первая глава займёт какое-то время!
+Ну, я предупреждала, что первая глава потребует времени!
