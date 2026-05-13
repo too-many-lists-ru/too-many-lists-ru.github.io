@@ -1,10 +1,5 @@
 # Метод Peek
 
-> One thing we didn't even bother to implement last time was peeking.
-> Let's go ahead and do that.
-> All we need to do is return a reference to the element in the head of the list, if it exists.
-> Sounds easy, let's try:
-
 В прошлой версии списка мы не реализовали один полезный метод, а именно — заглядывание.
 Настало время реализации.
 Всё, что нам надо — вернуть ссылку на элемент в голове списка, если он существует.
@@ -41,10 +36,6 @@ error[E0507]: cannot move out of borrowed content
 *Вздох*.
 Что теперь, Rust?
 
-> Map takes `self` by value, which would move the Option out of the thing it's in.
-> Previously this was fine because we had just `take`n it out, but now we actually want to leave it where it was.
-> The *correct* way to handle this is with the `as_ref` method on Option, which has the following definition:
-
 Функция `map` получает `self` по значению, что удаляет Option из `self.head`.
 Раньше это было нормально, потому что мы *забирали* узел себе, но сейчас мы хотим оставить его на месте.
 *Корректный* способ обработать такую ситуацию — вызвать у Option метод `as_ref`.
@@ -56,11 +47,7 @@ impl<T> Option<T> {
 }
 ```
 
-> It demotes the `Option<T>` to an Option to a reference to its internals.
-> We could do this ourselves with an explicit match but *ugh no*.
-> It does mean that we need to do an extra dereference to cut through the extra indirection, but thankfully the `.` operator handles that for us.
-
-Метод сужает `Option<T>` до опциональной ссылки на внутренее содержимое.
+Метод сужает `Option<T>` до опциональной ссылки на внутреннее содержимое.
 То же самое можно сделать с помощью оператора `match`, но в этом нет смысла, поскольку в стандартной библиотеке есть готовый метод.
 Теоретически, нам надо выполнить дополнительное разыменование, чтобы убрать один уровень косвенности, но, к счастью оператор `.` делает это за нас.
 
@@ -164,12 +151,7 @@ error[E0384]: cannot assign twice to immutable variable `value`
     |             ^^^^^^^^^^ cannot assign twice to immutable variable          ^~~~~
 ```
 
-> The compiler is complaining that `value` is immutable, but we pretty clearly wrote `&mut value`; what gives?
-> It turns out that writing the argument of the closure that way doesn't specify that `value` is a mutable reference.
-> Instead, it creates a pattern that will be matched against the argument to the closure; `|&mut value|` means "the argument is a mutable reference, but just copy the value it points to into `value`, please."
-If we just use `|value|`, the type of `value` will be `&mut i32` and we can actually mutate the head:
-
-Компилятор жалуется, что переменная `value` неизменяема, но мы довольно ясно написали `&mut value`.
+Компилятор жалуется, что переменная `value` неизменяемая, но мы довольно ясно написали `&mut value`.
 Так в чём же дело?
 Оказывается, эта запись не означает, что `value` является неизменяемой ссылкой.
 Она означает образец, который сопоставляется с аргументом замыкания; `|&mut value|` — это «аргумент является изменяемой ссылкой, но ты просто скопируй значение, на которое она ссылается, в переменную `value`, пожалуйста».
