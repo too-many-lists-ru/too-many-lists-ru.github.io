@@ -1,12 +1,7 @@
-> # Final Code
-
 # Финальный код
 
-> That's all I really have to say on the immutable stack.
-> We're getting pretty good at implementing lists now!
-
-Это всё, что я реально хотел сказать об иммутабельном стеке.
-Мы уже неплохо освоили работу со списками!
+Это всё, что я хотела рассказать о неизменяемом стеке.
+Мы тем временем уже неплохо освоили работу со списками!
 
 ```rust
 use std::rc::Rc;
@@ -96,7 +91,7 @@ mod test {
         let list = list.tail();
         assert_eq!(list.head(), None);
 
-        // Make sure empty tail works
+        // Убеждаемся, что tail работает с пустым списком
         let list = list.tail();
         assert_eq!(list.head(), None);
     }
