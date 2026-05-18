@@ -273,10 +273,6 @@ impl<T> Iterator for Iter<T> {
 `&T`?
 `Ref<T>`?
 
-> No, none of those work... our Iter doesn't have a lifetime anymore!
-> Both `&T` and `Ref<T>` require us to declare some lifetime up front before we get into `next`.
-> But anything we manage to get out of our Rc would be borrowing the Iterator... brain... hurt... aaaaaahhhhhh
-
 Ни один из них не работает... у нашего Iter в любом случае нет времени жизни!
 И `&T`, и `Ref<T>` требуют объявления какого-то времени жизни перед тем, как мы сможем вызвать `next`.
 Но всё, что мы сможем получить из нашего Rc, будет заимствованием Iterator... мозг... кипит... аааааааааааа

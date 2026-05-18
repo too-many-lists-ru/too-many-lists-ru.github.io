@@ -20,7 +20,7 @@ pub fn peek_front(&self) -> Option<&T> {
 }
 ```
 
-Но, подождите.
+Но, погодите.
 Не в этот раз.
 
 ```rust ,ignore
