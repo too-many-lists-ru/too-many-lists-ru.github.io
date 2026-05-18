@@ -273,10 +273,6 @@ impl<T> Iterator for Iter<T> {
 `&T`?
 `Ref<T>`?
 
-> No, none of those work... our Iter doesn't have a lifetime anymore!
-> Both `&T` and `Ref<T>` require us to declare some lifetime up front before we get into `next`.
-> But anything we manage to get out of our Rc would be borrowing the Iterator... brain... hurt... aaaaaahhhhhh
-
 Ни один из них не работает... у нашего Iter в любом случае нет времени жизни!
 И `&T`, и `Ref<T>` требуют объявления какого-то времени жизни перед тем, как мы сможем вызвать `next`.
 Но всё, что мы сможем получить из нашего Rc, будет заимствованием Iterator... мозг... кипит... аааааааааааа
@@ -284,7 +280,7 @@ impl<T> Iterator for Iter<T> {
 Может быть, мы можем... вызвать map... для Rc... чтобы получить `Rc<T>`?
 Так вообще можно?
 В доках Rc, похоже, ничего подобного нет.
-На самом деле, кто-то сделал [крейт][https://crates.io/crates/owning_ref], который это умеет.
+На самом деле, кто-то сделал [крейт](https://crates.io/crates/owning_ref), который это умеет.
 
 Но, подождите, даже если у нас *это* получится, мы получим ещё большую проблему: ужасную угрозу инвалидации итератора.
 Раньше мы не сталкивались с инвалидацией итератора, потому что Iter заимствовал список, оставляя его, в целом, неизменяемым.
