@@ -19,6 +19,7 @@
 | deref coercion        | автоматическое разыменование | |
 | desctructor           | деструктор                   | |
 | deque                 | дек                          | |
+| divergent function    | расходящаяся функция         | |
 | double linked         | двусвязный                   | |
 | drop                  | уничтожение                  | |
 | elision               | неявное выведение            | |
