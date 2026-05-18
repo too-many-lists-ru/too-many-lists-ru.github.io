@@ -1,12 +1,6 @@
-> # Symmetric Junk
-
 # Симметричный мусор
 
-> Alright let's get all that combinatoric symmetry over with.
-
 Что ж, давайте разберёмся со всей этой комбинаторной симметрией.
-
-> All we have to do is some basic text replacement:
 
 Всё, что нам нужно, это выполнить простую замену текста:
 
@@ -16,9 +10,7 @@ next <-> prev
 front -> back
 ```
 
-> Oh, also we need to add `_mut` variants for peeking.
-
-О, нам также надо написать варианты `_mut` для методов `peek`.
+Да, нам также надо написать варианты `_mut` для методов `peek`.
 
 ```rust ,ignore
 use std::cell::{Ref, RefCell, RefMut};
@@ -74,8 +66,6 @@ pub fn peek_front_mut(&mut self) -> Option<RefMut<T>> {
 }
 ```
 
-> And massively flesh out our tests:
-
 И значительно расширить наши тесты:
 
 ```rust ,ignore
@@ -83,53 +73,53 @@ pub fn peek_front_mut(&mut self) -> Option<RefMut<T>> {
 fn basics() {
     let mut list = List::new();
 
-    // Check empty list behaves right
+    // Проверяем, что пустой список ведёт себя правильно
     assert_eq!(list.pop_front(), None);
 
-    // Populate list
+    // Заполняем список
     list.push_front(1);
     list.push_front(2);
     list.push_front(3);
 
-    // Check normal removal
+    // Проверяем обычное удаление
     assert_eq!(list.pop_front(), Some(3));
     assert_eq!(list.pop_front(), Some(2));
 
-    // Push some more just to make sure nothing's corrupted
+    // Вставляем новые значения, просто чтобы проверить, что ничего не сломается
     list.push_front(4);
     list.push_front(5);
 
-    // Check normal removal
+    // Проверяем обычное удаление
     assert_eq!(list.pop_front(), Some(5));
     assert_eq!(list.pop_front(), Some(4));
 
-    // Check exhaustion
+    // Проверяем граничный случай
     assert_eq!(list.pop_front(), Some(1));
     assert_eq!(list.pop_front(), None);
 
     // ---- back -----
 
-    // Check empty list behaves right
+    // Проверяем, что пустой список ведёт себя правильно
     assert_eq!(list.pop_back(), None);
 
-    // Populate list
+    // Заполняем список
     list.push_back(1);
     list.push_back(2);
     list.push_back(3);
 
-    // Check normal removal
+    // Проверяем обычное удаление
     assert_eq!(list.pop_back(), Some(3));
     assert_eq!(list.pop_back(), Some(2));
 
-    // Push some more just to make sure nothing's corrupted
+    // Вставляем новые значения, просто чтобы проверить, что ничего не сломается
     list.push_back(4);
     list.push_back(5);
 
-    // Check normal removal
+    // Проверяем обычное удаление
     assert_eq!(list.pop_back(), Some(5));
     assert_eq!(list.pop_back(), Some(4));
 
-    // Check exhaustion
+    // Проверяем граничный случай
     assert_eq!(list.pop_back(), Some(1));
     assert_eq!(list.pop_back(), None);
 }
@@ -151,16 +141,10 @@ fn peek() {
 }
 ```
 
-> Are there some cases we're not testing?
-> Probably.
-> The combinatoric space has really blown up here.
-> Our code is at very least not *obviously wrong*.
-
 Есть ли сценарии, которые мы не протестировали?
 Возможно.
-Комбинаторное пространство действительно здесь разрослось.
-<!-- Количество комбинаций методов действительно стало стало очень большим  -->
-По крайней мере, наш код не *явно ошибочный*.
+Количество комбинаций методов действительно стало очень большим.
+Но, по крайней мере, наш код не *явно ошибочный*.
 
 ```text
 > cargo test
@@ -182,9 +166,6 @@ test third::test::basics ... ok
 test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured
 
 ```
-
-> Nice.
-> Copy-pasting is the best kind of programming.
 
 Прекрасно.
 Копи-паста — лучший способ программирования.
