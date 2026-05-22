@@ -1,5 +1,7 @@
 > # Attempting To Understand Stacked Borrows
 
+# Пытаемся разобраться в многоуровневом заимствовании
+
 > In the previous section we tried running our unsafe singly-linked queue under miri, and it said we had broken the rules of *stacked borrows*, and linked us some documentation.
 
 > Normally I'd give a guided tour of the docs, but we're not really the target audience of that documentation. It's more designed for compiler developers and academics who are working on the semantics of Rust. 

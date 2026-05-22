@@ -1,39 +1,78 @@
 > # Miri
 
+# Miri
+
 > *nervously laughs* This unsafe stuff is so easy, I don't know why everyone says otherwise.
 > Our program works perfectly.
 
+*нервно смеётся* Все эти штуки с `unsafe` оказались такими простыми, я не понимаю, почему все утверждают обратное.
+Наша программа прекрасно работает.
+
 > > **NARRATOR:** 🙂
+
+> **ГОЛОС ЗА КАДРОМ:** 🙂
 
 > ...right?
 
+...правда?
+
 > > **NARRATOR:** 🙂
+
+> **ГОЛОС ЗА КАДРОМ:** 🙂
 
 > Well, we're writing `unsafe` code now, so the compiler can't help us catch mistakes as well.
 > It could be that the tests *happened* to work, but were actually doing something non-deterministic.
 > Something Undefined Behavioury.
 
-> But what can we do? We've pried open the windows and snuck out of rustc's classroom.
+Ладно, мы только что написали небезопасный код, так что компилятор не может нам помочь с поиском ошибок.
+Возможно, тесты сработали *случайно*, а на самом деле у нас там что-то недетерминированное.
+Какое-то Неопределённое Поведение.
+
+> But what can we do?
+> We've pried open the windows and snuck out of rustc's classroom.
 > No one can help us now.
+
+Но что мы можем сделать?
+Мы выломали окна и сбежали из класса <!-- учителя --> rustc.
+Теперь нам никто не поможет.
 
 > ...Wait, who's that sketchy looking person in the alleyway?
 
+...подождите, а что это за подозрительный тип в переулке?
+
 > *"Hey kid, you wanna interpret some Rust code?"*
+
+*"Эй, парень, не хочешь поинтерпретировать немного Rust кода?"*
 
 > Wh- no?
 > Why,
 
+Ннннет...
+Наверное.
+
 > *"It's wild man, it can validate that the actual dynamic execution of your program conforms to the semantics of Rust's memory model. Blows your mind..."*
+
+*"Чувак, это невероятно, интерпретация может подтвердить, что фактическое динамическое исполнение твоей программы соответствует семантике модели памяти Rust. Просто сносит крышу..."*
 
 > What?
 
+Что?
+
 > *"It checks if you Do An Undefined Behaviour."*
+
+*"Она проверяет, есть ли у тебя Неопределённое Поведение."*
 
 > I guess I could try interpretters just *once*.
 
+Думаю, *один* раз я могу попробовать интерпретацию.
+
 > *"You've got rustup installed right?"*
 
+*"У тебя же установлен rustup, правда?"*
+
 > Of course I do, it's *the* tool for having an up to date Rust toolchain!
+
+Конечно да, это же *та самая* утилита для поддержания инструментария Rust в актуальном состоянии!
 
 ```text
 > rustup +nightly-2022-01-21 component add miri
@@ -58,7 +97,11 @@ info: installing component 'miri'
 
 > What did you just install on my computer!?
 
+Что ты только что установил на мой компьютер!?
+
 > *"The Good Stuff"*
+
+*"Отличную Вещь"*
 
 > > **NARRATOR:** Some weird stuff going on with toolchain versions:
 > >
@@ -74,6 +117,20 @@ info: installing component 'miri'
 > > Whenever we invoke miri via `cargo miri` we will also use this `+` syntax to specify the toolchain we installed miri on.
 > > If you don't want to have to specify it every time, you can use [`rustup override set`](https://rust-lang.github.io/rustup/overrides.html).
 
+> **ГОЛОС ЗА КАДРОМ:** Есть кое-какие тонкости, касающиеся версии инструментария:
+> 
+> Инструмент, который мы устанавливаем, `miri`, тесно взаимодействует с внутренностями rustc, поэтому он доступен только в ночных сборках.
+> 
+> `+nightly-2022-01-21` указывает `rustup`, что мы хотим установить miri вместе с ночной сборкой инструментария за указанную дату.
+> Я указываю конкретную дату, потому что иногда miri содержит ошибки и не компилируется несколько ночей подряд.
+> rustup автоматически загрузит любой инструментарий, который мы укажем с помощью `+`, если он ещё не установлен.
+>
+> 2022-01-21 — это сборка, в которой я точно знаю, miri работает, что можно проверить [на этой странице](https://rust-lang.github.io/rustup-components-history/).
+> Если вы счастливчик, можете использовать просто `+nightly`.
+> 
+> Мы будем использовать синтаксис `+` при каждом вызове miri через `cargo miri` для указания версии совместимого инструментария.
+> Если не хотите каждый раз писать версию, запустите [`rustup override set`](https://rust-lang.github.io/rustup/overrides.html)
+
 ```text
 > cargo +nightly-2022-01-21 miri test
 
@@ -83,7 +140,11 @@ a recent enough xargo. Proceed? [Y/n]
 
 > UH WHAT ON EARTH IS XARGO?
 
+Э-Э-Э, ЧТО ЭТО ЗА XARGO?
+
 > *"It's fine, don't worry about it."*
+
+*Не бери в голову, всё в порядке."*
 
 ```text
 > y
@@ -102,7 +163,11 @@ the `rust-src` component for the selected toolchain. Proceed? [Y/n]
 
 > UH???
 
+Э-Э??
+
 > *"Who doesn't love having a copy of Rust's source code?"*
+
+*"Кто же не любит иметь копию исходного кода Rust?"*
 
 ```text
 > y
@@ -112,6 +177,8 @@ info: installing component 'rust-src'
 ```
 
 > *"Aw yeah it's ready, here's the good part."*
+
+*"Ну, вот, всё готово, а теперь самое интересное."*
 
 ```text
    Compiling lists v0.1.0 (C:\Users\ninte\dev\tmp\lists)
@@ -173,24 +240,44 @@ error: aborting due to previous error
 > Woah.
 > That's one heck of an error.
 
+Ого.
+Какая ужасная ошибка.
+
 > *"Yeah, look at that shit. You love to see it."*
+
+*"Да, взгляни на это дерьмо. Тебе понравится на него натыкаться."*
 
 > Thank you?
 
+Благодарю?
+
 > *"Here take the bottle of estradiol too, you're gonna need it later."*
+
+*"Вот возьми и бутылочку эстрадиола, она тебе пригодится."*
 
 > Wait why?
 
+Подожди, зачем?
+
 > *"You're about to think about memory models, trust me."*
 
-> > **NARRATOR:** The mysterious person then proceeded to transform into a fox and scampered through a hole in the wall. The author then stared into the middle distance for several minutes while they tried to process everything that just happened.
+*"Поверь мне, скоро ты начнёшь думать о моделях памяти."*
 
+> > **NARRATOR:** The mysterious person then proceeded to transform into a fox and scampered through a hole in the wall.
+> > The author then stared into the middle distance for several minutes while they tried to process everything that just happened.
+
+> **ГОЛОС ЗА КАДРОМ:** после этого незнакомец превратился в лису и проскользнул сквозь дыру в стене.
+> Автор несколько минут смотрела в никуда, пытаясь осмыслить произошедшее.
 
 -------
 
 > The mysterious fox in the alleyway was right about more than just my gender: miri really is The Good Shit.
 
+Таинственная лиса оказалась права не только по поводу моего пола: miri — действительно Отличная Вещь.
+
 > Ok so what *is* [miri](https://github.com/rust-lang/miri)?
+
+Так что же *такое* [miri](https://github.com/rust-lang/miri)?
 
 > > An experimental interpreter for Rust's mid-level intermediate representation (MIR).
 > > It can run binaries and test suites of cargo projects and detect certain classes of undefined behavior, for example:
@@ -209,24 +296,54 @@ error: aborting due to previous error
 > >
 > > However, be aware that Miri will not catch all cases of undefined behavior in your program, and cannot run all programs
 
+> Экспериментальный интерпретатор промежуточного представления среднего уровня (Mid-level Intermediate Representation, MIR).
+> Он может запускать бинарники и тестовые наборы из проектов cargo и обнаруживать целые классы неопределённого поведения, например:
+> 
+> * Выход за границы допустимого диапазона памяти и использование памяти после освобождения
+> * Недопустимое использование неинициализированных данных
+> * Нарушение внутренних предусловий (достижение `unreachable_unchecked`, вызов `copy_nonoverlapping` с перекрывающимися диапазонами, ...)
+> * Доступ к памяти и ссылкам с недостаточно строгим выравниванием
+> * Нарушение некоторых базовых инвариантов для типов (значение bool, отличное от 0 и 1 или неизвестная метка перечисления)
+> * Экспериментально: Нарушение правил многоуровневого заимствования, регулирующих псевдонимы для ссылочных типов
+> * Экспериментально: Состояние гонки данных (но без эффектов ослабленной модели памяти)
+> 
+> Кроме того, miri сообщит вам об утечках памяти: если после завершения программы останется выделенная память, недоступная из глобальной статической переменной, miri выдаст ошибку.
+> 
+> ...
+> 
+> Однако, имейте в виду, что miri не сможет обнаружить все случаи неопределённого поведения в вашей программе и не сможет запустить все программы.
+
 > TL;DR: it interprets your program and notices if you break the rules *at runtime* and Do An Undefined Behaviour.
 > This is necessary because Undefined Behaviour is *generally* a thing that happens at runtime.
 > If the issue could be found at compile time, the compiler would just make it an error!
 
+В двух словах: он интерпретирует вашу программу и сообщает о всех нарушениях правил *во время выполнения* и о Неопределённом Поведении.
+Это нужно, поскольку Неопределённое Поведение — это то, что *обычно* случается во время выполнения.
+Если бы проблему можно было обнаружить на этапе компиляции, компилятор просто выдал бы ошибку!
+
 > If you're familiar with tools like ubsan and tsan: it's basically that but all together and more extreme.
+
+Если вы знакомы с такими инструментами, как ubsan и tsan: по сути, miri — то же самое, но всё в одном и в более экстремальном виде.
 
 -------
 
 > Miri is now hanging outside the classroom window with a knife.
 > A learning knife.
 
+Сейчас miri шатается с ножом за стенами класса.
+С учебным ножом.
+
 > If we ever want miri to check our work, we can ask them to interpret our test suite with
+
+Если когда нибудь мы захотим, чтобы miri проверил нашу работу, мы можем попросить его интерпретировать наш тестовый набор с помощью команды:
 
 ```text
 > cargo +nightly-2022-01-21 miri test
 ```
 
 > Now let's take a closer look at what they carved into our desk:
+
+Теперь давайте рассмотрим, что он вырезал на нашей парте:
 
 ```text
 error: Undefined Behavior: trying to reborrow for Unique at alloc84055, but parent tag <209678> does not have an appropriate item in the borrow stack
@@ -251,4 +368,9 @@ error: Undefined Behavior: trying to reborrow for Unique at alloc84055, but pare
 > Well I can see we made an error, but that's a confusing error message.
 > What's the "borrow stack"?
 
+Ладно, я вижу, что мы допустили ошибку, но сообщение об ошибке сбивает меня с толку.
+Что такое «стек заимствований».
+
 > We'll try to figure that out in the next section.
+
+Постараемся разобраться с этим в следующем разделе.
