@@ -14,6 +14,7 @@
 | allocation            | размещение, выделение        | |
 | amortization          | амортизированная сложность   | |
 | borrowing             | заимствование                | |
+| borrow checker        | анализатор заимствований     | |
 | box                   | бокс                         | |
 | cache                 | кэш                          | |
 | coroutine             | корутина                     | |
@@ -40,9 +41,12 @@
 | pattern matching      | сопоставление с образцом     | |
 | persistent            | устойчивый                   | |
 | raw pointers          | сырые указатели              | |
+| reborrow              | повторное заимствование      | |
 | single linked         | односвязный                  | |
 | shared                | разделяемый                  | |
-| stacked borrow        | многоуровневое заимствование | |
+| stacked borrow        | стековое заимствование       | |
 | toolchain             | инструментарий               | |
+| UB                    | UB                           | традиционно не переводят |
+| Undefined Behaviour   | Неопределённое Поведение     | |
 | unsafe                | небезопасный                 | |
 | variance              | вариантность                 | |
