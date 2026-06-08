@@ -13,18 +13,21 @@
 | aliasing              | псевдонимизация              | |
 | allocation            | размещение, выделение        | |
 | amortization          | амортизированная сложность   | |
+| boilerplate           | рутинный код                 | |
 | borrowing             | заимствование                | |
 | borrow checker        | анализатор заимствований     | |
 | box                   | бокс                         | |
 | cache                 | кэш                          | |
-| coroutine             | корутина                     | |
+| coroutine             | сопрограмма                  | |
 | deref coercion        | автоматическое разыменование | |
 | destructor            | деструктор                   | |
 | deque                 | дек                          | |
 | divergent function    | расходящаяся функция         | |
 | double linked         | двусвязный                   | |
 | drop                  | уничтожение                  | |
+| early return          | ранний возврат               | |
 | elision               | неявное выведение            | |
+| exception safety      | устойчивость к исключениям   | |
 | future                | футура                       | |
 | generics              | обобщения                    | |
 | immutable             | неизменяемый                 | |
@@ -42,9 +45,11 @@
 | persistent            | устойчивый                   | |
 | raw pointers          | сырые указатели              | |
 | reborrow              | повторное заимствование      | |
+| region                | участок                      | |
 | single linked         | односвязный                  | |
 | shared                | разделяемый                  | |
 | stacked borrow        | стековое заимствование       | |
+| subtype               | подтип                       | |
 | toolchain             | инструментарий               | |
 | UB                    | UB                           | традиционно не переводят |
 | Undefined Behaviour   | Неопределённое Поведение     | |

@@ -1,13 +1,20 @@
 > # Boring Combinatorics
 
+# Скучная комбинаторика
+
 > Ok, back to our regularly scheduled linked lists!
 
+Ладно, возвращаемся к нашим ежедневным связным спискам!
+
 > First let's knock out `Drop` which is trivial with pop:
+
+Для начала разберёмся с `Drop`, который тривиально реализуется с помощью pop:
 
 ```rust ,ignore
 impl<T> Drop for LinkedList<T> {
     fn drop(&mut self) {
         // Pop until we have to stop
+        // Вызываем pop до самого конца
         while let Some(_) = self.pop_front() { }
     }
 }
@@ -15,12 +22,23 @@ impl<T> Drop for LinkedList<T> {
 
 > We've got to fill in a bunch of really boring combinatoric implementations like front, front_mut, back, back_mut, iter, iter_mut, into_iter, ...
 
+Нам нужно написать кучу поистине скучных комбинаторный реализации, наподобие front, front_mut, back, back_mut, iter, iter_mut, into_iter, ...
+
 > You could do them with macros or whatever but honestly, that's a worse fate than copy-pasting.
 > We're just going to do a lot of copy-pasting.
 > I have *very carefully* crafted the previous push/pop implementations so that we should be able to *literally* just swap front and back and the code does/says the right thing!
-> Hooray for painful experience! (It's so tempting to talk about "prev and next" for nodes, but I find it's really worth it to just consistently talk about "front" and "back" as much as possible to avoid mistakes.)
+> Hooray for painful experience!
+> (It's so tempting to talk about "prev and next" for nodes, but I find it's really worth it to just consistently talk about "front" and "back" as much as possible to avoid mistakes.)
+
+Можно было бы воспользоваться макросами или чем то подобным, но, честно говоря, это хуже, чем обычная копи-паста.
+Нам предстоит много копи-пасты.
+Я *очень тщательно* подошла к реализации предыдущих push/pop, так что нам осталось *буквально* поменять местами front и back, и код будет работать!
+Да здравствует болезненный опыт!
+(Заманчиво говорить о «предыдущем и следующем» узлах, но я обнаружила, что термины «передний» и «задний» ведут к большей согласованности и позволяют избегать ошибок.)
 
 > Alright, first up, `front`:
+
+Ладно, начнём с `front`:
 
 ```rust ,ignore
 pub fn front(&self) -> Option<&T> {
@@ -32,6 +50,8 @@ pub fn front(&self) -> Option<&T> {
 
 > Hey actually, this book is really old and some nice new things have been added like the `?` operator which does an early return on Option::None, does that make our code nicer?
 
+А ведь этак книга очень старая, так что я решила добавить в код несколько приятных нововведений, скажем, оператор `?`, который приходит к раннему возврату в случае `Option::None`
+интересно, это улучшит наш код?
 
 ```rust ,ignore
 pub fn front(&self) -> Option<&T> {
@@ -42,7 +62,12 @@ pub fn front(&self) -> Option<&T> {
 ```
 
 > Maybe?
-> It's kind of a wash for something this simple, and the previous section was all about how early returns are kinda spooky for us, so maybe we should prefer being a bit more explicit here (I'm sticking to the `map` implementation).  On to front_mut:
+> It's kind of a wash for something this simple, and the previous section was all about how early returns are kinda spooky for us, so maybe we should prefer being a bit more explicit here (I'm sticking to the `map` implementation).
+> On to front_mut:
+
+Нормально?
+В таком простом код это практически ничего не улучшило, а, кроме того, в предыдущем разделе мы говорили о том, что ранние возвраты для нас опасны, так что, возможно, нам следует писать здесь чуть более явный код (мне всё ещё нравится старая реализация через `map`).
+Теперь front_mut:
 
 ```rust ,ignore
 pub fn front_mut(&mut self) -> Option<&mut T> {
@@ -54,15 +79,27 @@ pub fn front_mut(&mut self) -> Option<&mut T> {
 
 > I'll just dump all the `back` versions at the end. 
 
+В конце я просто добавлю все версии `back`.
+
 > Next up, iterators.
 > Unlike all of our previous lists we've *finally* unlocked the ability to do [DoubleEndedIterator](https://doc.rust-lang.org/std/iter/trait.DoubleEndedIterator.html), and if we're going for production quality we're gonna do [ExactSizeIterator](https://doc.rust-lang.org/std/iter/trait.ExactSizeIterator.html) too.
 
+Далее, итераторы.
+В отличие от всех наших прошлых списков, мы *наконец* можем реализовать [DoubleEndedIterator](https://doc.rust-lang.org/std/iter/trait.DoubleEndedIterator.html, и, поскольку мы вышли на продуктовый уровень — ещё и [ExactSizeIterator](https://doc.rust-lang.org/std/iter/trait.ExactSizeIterator.html).
+
 > So in addition to `next` and `size_hint`, we're going to support `next_back` and `len`.
+
+Таким образом, помимо `next` и `size_hint`, мы также реализуем `next_back` и `len`.
 
 > The vigilant among you might notice that IterMut seems a lot more sketchy with double-ended iteration, but it's actually still sound!
 
+Самые внимательные читатели могут заметить, что IterMut в случае итерации с двумя концами выглядит гораздо подозрительнее, но но самом деле он всё ещё работает!
+
 > ... god this is gonna be a lot of boilerplate.
 > Maybe I should really write a macro... no, no, that's still a worse fate.
+
+...боже, будет тонна рутинного кода.
+Возможно, мне следует написать макрос... нет, нет, это всё ещё плохая идея.
 
 ```rust ,ignore
 pub struct Iter<'a, T> {
@@ -100,8 +137,13 @@ impl<'a, T> Iterator for Iter<'a, T> {
         // While self.front == self.back is a tempting condition to check here,
         // it won't do the right for yielding the last element! That sort of
         // thing only works for arrays because of "one-past-the-end" pointers.
+        // Хотя условие self.front == self.back кажется здесь очевидным,
+        // оно не подходит для возврата последнего элемента! Подобный код
+        // работает только с массивами из-за указателей «на элемент, следующий
+        // за последним»
         if self.len > 0 {
             // We could unwrap front, but this is safer and easier
+            // Мы могли бы развернуть front, но так быстрее и безопаснее
             self.front.map(|node| unsafe {
                 self.len -= 1;
                 self.front = (*node.as_ptr()).back;
@@ -140,7 +182,13 @@ impl<'a, T> ExactSizeIterator for Iter<'a, T> {
 
 > ...that's just `.iter()`...
 
-> we'll paste IterMut at the end, it's literally the exact same code with `mut` in a lot of places, let's just knock out `into_iter` first. We can mercifully still lean on our tried-and-true solution of just making it wrap our collection and using pop for next:
+...это всего лишь `.iter()`...
+
+> we'll paste IterMut at the end, it's literally the exact same code with `mut` in a lot of places, let's just knock out `into_iter` first.
+> We can mercifully still lean on our tried-and-true solution of just making it wrap our collection and using pop for next:
+
+Мы добавим IterMut в конце, это буквально тот же код, но с большим количеством `mut`, для начала разберёмся с `into_iter`.
+К счастью, мы всё ещё можем положиться на проверенное решение: завернуть нашу коллекцию и использовать pop для next:
 
 ```rust ,ignore
 pub struct IntoIter<T> {
@@ -192,7 +240,11 @@ impl<T> ExactSizeIterator for IntoIter<T> {
 
 > Still a crapload of boiler plate, but at least it's *satisfying* boilerplate.
 
+Всё ещё куча рутинного кода, но, по крайней мере, это *удовлетворительный* рутинный код.
+
 > Alright, here's all of our code with all the combinatorics filled in:
+
+Ладно, вот весь наш код со всеми комбинаторными вариантами:
 
 ```rust
 use std::ptr::NonNull;

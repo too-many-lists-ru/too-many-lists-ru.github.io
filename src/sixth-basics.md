@@ -1,7 +1,12 @@
 > # Basics
 
+# Основы
+
 > Alright, this is the part of the book that sucks, and why it took me 7 years to write this chapter!
 > Time to just burn through a whole lot of really boring stuff we've done 5 times already, but extra verbose and long because we have to do everything twice and with `Option<NonNull<Node<T>>>`!
+
+Ладно, вот самая ужасная часть книги, вот почему мне потребовалось 7 лет, чтобы написать эту главу!
+Настало время ещё раз сделать уйму поистине скучных вещей, которые мы делали уже 5 раз, но теперь они стали ещё многословнее и длиннее, потому что нам предстоит делать всё дважды со всеми этими `Option<NonNull<Node<T>>>`!
 
 ```rust ,ignore
 impl<T> LinkedList<T> {
@@ -19,9 +24,13 @@ impl<T> LinkedList<T> {
 > PhantomData is a weird type with no fields so you just make one by, saying its type name.
 > *shrug*
 
+PhantomData — это странный тип без полей, так что его можно создать, просто указав его имя.
+*пожимает плечами*
+
 ```rust ,ignore
 pub fn push_front(&mut self, elem: T) {
     // SAFETY: it's a linked-list, what do you want?
+    // БЕЗОПАСНОСТЬ: это связный список, что вы делаете?
     unsafe {
         let new = NonNull::new_unchecked(Box::into_raw(Box::new(Node {
             front: None,
@@ -30,12 +39,17 @@ pub fn push_front(&mut self, elem: T) {
         })));
         if let Some(old) = self.front {
             // Put the new front before the old one
+            // Вставляем новую голову перед старой
             (*old).front = Some(new);
             (*new).back = Some(old);
         } else {
             // If there's no front, then we're the empty list and need 
             // to set the back too. Also here's some integrity checks
             // for testing, in case we mess up.
+            // Если головы нет, тогда у нас пустой список и нам надо
+            // установить также и значение хвоста. Также здесь у нас
+            // есть несколько проверок для тестирования, на случай,
+            // если мы что-то напутали.
             debug_assert!(self.back.is_none());
             debug_assert!(self.front.is_none());
             debug_assert!(self.len == 0);
@@ -59,6 +73,8 @@ error[E0614]: type `NonNull<Node<T>>` cannot be dereferenced
 > Ah yes, I truly hate my pointer-y children.
 > We need to explicitly get the raw pointer out of NonNull with `as_ptr`, because DerefMut is defined in terms of `&mut` and we don't want to randomly introduce safe references into our unsafe code!
 
+О, да, именно поэтому я ненавижу своих детишек, напичканных указателями.
+Нам нужно явно извлечь сырой указатель из NotNull с помощью `as_ptr`, потому что DerefMut определён через `&mut`, а мы не хотим произвольным образом вводить безопасные ссылки в наш небезопасный код!
 
 ```rust ,ignore
             (*old.as_ptr()).front = Some(new);
@@ -82,6 +98,8 @@ warning: `linked-list` (lib test) generated 1 warning
 
 > Nice, now for pop (and len):
 
+Прекрасно, теперь pop (и len):
+
 ```rust ,ignore
 pub fn pop_front(&mut self) -> Option<T> {
     unsafe {
@@ -89,19 +107,29 @@ pub fn pop_front(&mut self) -> Option<T> {
         // Note that we don't need to mess around with `take` anymore
         // because everything is Copy and there are no dtors that will
         // run if we mess up... right? :) Riiiight? :)))
+        // Должны что-то делать, только если у списка есть голова.
+        // Обратите внимание, что мы больше не должны беспокоиться
+        // о `take`, потому что всё теперь Copy и нет деструкторов,
+        // которые будут запущены, если мы что-то напутаем... правда? :)
+        // Праааавда? :)))
         self.front.map(|node| {
             // Bring the Box back to life so we can move out its value and
             // Drop it (Box continues to magically understand this for us).
+            // Возвращаем к жизни Box, так что мы можем извлечь его значение
+            // и уничтожить его (Box магическим образом делает это за нас).
             let boxed_node = Box::from_raw(node.as_ptr());
             let result = boxed_node.elem;
 
             // Make the next node into the new front.
+            // Делаем следующий узел новой головой.
             self.front = boxed_node.back;
             if let Some(new) = self.front {
                 // Cleanup its reference to the removed node
+                // Убираем её ссылку на удалённый узел.
                 (*new.as_ptr()).front = None;
             } else {
                 // If the front is now null, then this list is now empty!
+                // Если голова теперь равна null, значит, список теперь пустой!
                 debug_assert!(self.len == 1);
                 self.back = None;
             }
@@ -109,6 +137,7 @@ pub fn pop_front(&mut self) -> Option<T> {
             self.len -= 1;
             result
             // Box gets implicitly freed here, knows there is no T.
+            // Здесь Box неявным образом освобождается, потому что больше нет T.
         })
     }
 }
@@ -125,6 +154,8 @@ pub fn len(&self) -> usize {
 
 > Seems legit to me, time to write a test!
 
+Мне кажется, всё в порядке, пора писать тест!
+
 ```rust ,ignore
 #[cfg(test)]
 mod test {
@@ -135,11 +166,13 @@ mod test {
         let mut list = LinkedList::new();
 
         // Try to break an empty list
+        // Пытаемся сломать пустой список
         assert_eq!(list.len(), 0);
         assert_eq!(list.pop_front(), None);
         assert_eq!(list.len(), 0);
 
         // Try to break a one item list
+        // Пытаемся сломать список из одного элемента
         list.push_front(10);
         assert_eq!(list.len(), 1);
         assert_eq!(list.pop_front(), Some(10));
@@ -148,6 +181,7 @@ mod test {
         assert_eq!(list.len(), 0);
 
         // Mess around
+        // Всё перемешиваем
         list.push_front(10);
         assert_eq!(list.len(), 1);
         list.push_front(20);
@@ -186,4 +220,8 @@ test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 > Hooray, we're perfect!
 
+Ура, у нас всё идеально!
+
 > ...Right?
+
+...Правда?

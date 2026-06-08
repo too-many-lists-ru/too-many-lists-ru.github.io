@@ -1,13 +1,24 @@
 > # Final Code
 
+ # Финальный код
+
 > I can't believe I actually just made you sit through me actually reimplementing std::collections::LinkedList from scratch, with all the fiddly little pedantry and mistakes I made along the way.
 
+Не могу поверить, что заставила вас пройти со мной через переработку std::collections::LinkedList от начала и до конца, с разбором всех ошибок, которые я допустила по дороге.
+
 > I did it, the book is done, I can finally rest.
+
+Ну, моя работа завершена, книга готова и я, наконец, могу отдохнуть.
 
 > Alright, here's all 1200 lines of our complete rewrite of  in all of its glory.
 > This should be the same text as [this commit](https://github.com/contain-rs/linked-list/commit/5b69cc29454595172a5167a09277660342b78092).
 
+Хорошо, вот 1200 строк нашей полной переработки во всей красе.
+Тут должен быть тот же код, что и в [этом коммите](https://github.com/contain-rs/linked-list/commit/5b69cc29454595172a5167a09277660342b78092).
+
 > I'll put some polish and docs back on and publish 0.1.0 later.
+
+Позже я добавлю немного полировки и документацию, и опубликую версию 0.1.0.
 
 ```rust
 use std::cmp::Ordering;

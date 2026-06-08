@@ -1,8 +1,14 @@
 > # Filling In Random Bits
 
+# Всякая всячина
+
 > Hey you said you wanted to be production-quality, didn't you? 
 
+Эй, вы же говорили, что хотите продуктового кода, нет?
+
 > Here's some more random gunk to toss in to be a "good" collection:
+
+Вот немного всякой всячины, чтобы получилась «хорошая» коллекция:
 
 ```rust ,ignore
 impl<T> LinkedList<T> {
@@ -12,12 +18,15 @@ impl<T> LinkedList<T> {
 
     pub fn clear(&mut self) {
         // Oh look it's drop again
+        // О, смотрите, это снова drop
         while let Some(_) = self.pop_front() { }
     }
 }
 ```
 
 > And now we've got a bunch of traits to implement that everyone expects:
+
+Теперь нам надо реализовать множество типажей, которые все ждут от коллекции:
 
 ```rust ,ignore
 impl<T> Default for LinkedList<T> {
@@ -96,10 +105,19 @@ impl<T: Hash> Hash for LinkedList<T> {
 > Because they're so interesting, and I definitely remember the subtleties of manually implementing Hash.
 > Yeah, that's something I think about All The Time...
 
+Я написала всё это с нуля, а не просто скопировала из стандартной библиотеки.
+Потому что всё здесь такое интересное и я определённо помню все тонкости ручной реализации Hash.
+Да, я постоянно думаю об этом...
+
 > Ok there's actually a few things worth noting here.
+
+Ладно, здесь действительно есть несколько моментов, на которые надо обратить внимание.
 
 > First, a nasty namespace clash.
 > For whatever reason std now has macros named Hash and Debug, and so if you don't have the traits imported, you'll get really cryptic errors about macros instead of the proper "missing trait".
+
+Во-первых, неприятный конфликт пространств имён.
+По какой-то причине в стандартной библиотеке теперь есть макросы с именами Hash и Debug, так что если вы не импортировали типажи, вы получите поистине таинственные ошибки о макросах вместо простого «типаж не найден».
 
 > The other intersting thing to talk about is Hash itself.
 > Do you see how we hash in `len`?
@@ -109,7 +127,17 @@ impl<T: Hash> Hash for LinkedList<T> {
 > If no one is hashing lengths or some other "separator", nothing!
 > Making it too easy for hash collisions to accidentally or maliciously happen can result in serious sadness, so just do it!
 
+Другая интересная вещь касается самого Hash.
+Вы видите, что мы вызываем hash у `len`?
+Это на самом деле важно!
+Если коллекции не учитывают свою длину при вычислении хеша, [они могут случайно стать уязвимыми для коллизии префиксов](https://doc.rust-lang.org/std/hash/trait.Hash.html#prefix-collisions).
+Например, чем отличается `["he", "llo"]` от `["hello"]`?
+Если при вычислении хеша вы не используете длину или какой-то разделитель, то ничем!
+Слишком высокая вероятность коллизий при вычислении хеша может привести к большим неприятностям, так что просто напишите так, как надо!
+
 > Alright, here's our current code:
+
+Хорошо, вот наш текущий код:
 
 ```rust
 use std::cmp::Ordering;

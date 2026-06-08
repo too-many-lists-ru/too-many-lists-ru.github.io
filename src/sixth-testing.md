@@ -1,9 +1,16 @@
 > # Testing
 
+# Тестирование
+
 > Alright I put off testing for a while because well, we both know that we're now masters of Rust and we don't make mistakes anymore!
 > Also just, this is a rewrite of an old crate, so I just have all the tests already.
 > They're tests, you've seen tests a lot already.
 > Here they are:
+
+Ладно, я отложила тестирования на потом, потому что, ну, мы теперь оба знаем, что мы мастера Rust и больше не допускаем ошибок!
+Кроме того, это переписанная версия старого крейта, так что у меня уже были все тесты.
+Вы их уже видели, и не раз.
+Вот они:
 
 ```rust ,ignore
 #[cfg(test)]
@@ -281,6 +288,8 @@ mod test {
 
 > And now for the moments of truth:
 
+А сейчас момент истины:
+
 ```text
 cargo test
     Finished test [unoptimized + debuginfo] target(s) in 0.00s
@@ -333,4 +342,10 @@ test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
 > This isn't a trick!
 > All of our practice and training was finally worth it, we've finally written *good code*!!!
 
+У нас получилось и мы не облажались.
+Это не трюк!
+Вся наша практика, все тренировки наконец окупились, мы, наконец, написали *хороший код*!!!
+
 > Now with all that gunk out of the way, we can get back to the Interesting Stuff!
+
+Теперь, когда вся ерунда позади, мы можем вернуться к Интересным Вещам!
