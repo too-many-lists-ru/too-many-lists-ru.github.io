@@ -10,19 +10,22 @@
 
 |      Английский       |            Русский           | Комментарий |
 ----------------------------------------------------------------------
-| aliasing              | псевдонимы                   | |
+| aliasing              | псевдонимизация              | |
 | allocation            | размещение, выделение        | |
 | amortization          | амортизированная сложность   | |
 | borrowing             | заимствование                | |
+| borrow checker        | анализатор заимствований     | |
 | box                   | бокс                         | |
 | cache                 | кэш                          | |
+| coroutine             | корутина                     | |
 | deref coercion        | автоматическое разыменование | |
-| desctructor           | деструктор                   | |
+| destructor            | деструктор                   | |
 | deque                 | дек                          | |
 | divergent function    | расходящаяся функция         | |
 | double linked         | двусвязный                   | |
 | drop                  | уничтожение                  | |
 | elision               | неявное выведение            | |
+| future                | футура                       | |
 | generics              | обобщения                    | |
 | immutable             | неизменяемый                 | |
 | inherited mutability  | наследуемая изменчивость     | |
@@ -33,12 +36,17 @@
 | lifetime              | время жизни                  | |
 | move out              | извлечь, извлечение          | |
 | mutable               | изменяемый                   | |
+| narrator              | голос за кадром              | |
 | ownership             | владение                     | |
 | pattern matching      | сопоставление с образцом     | |
 | persistent            | устойчивый                   | |
 | raw pointers          | сырые указатели              | |
+| reborrow              | повторное заимствование      | |
 | single linked         | односвязный                  | |
 | shared                | разделяемый                  | |
-| stacked borrow        | многоуровневое заимствование | |
+| stacked borrow        | стековое заимствование       | |
 | toolchain             | инструментарий               | |
+| UB                    | UB                           | традиционно не переводят |
+| Undefined Behaviour   | Неопределённое Поведение     | |
+| unsafe                | небезопасный                 | |
 | variance              | вариантность                 | |
