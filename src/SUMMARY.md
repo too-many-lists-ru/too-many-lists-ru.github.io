@@ -34,7 +34,7 @@
     * [Симметричные случаи](fourth-symmetry.md)
     * [Итерация](fourth-iteration.md)
     * [Финальный код](fourth-final.md)
-* [Хорошая безопасная очередь](fifth.md)
+* [Хорошая небезопасная очередь](fifth.md)
     * [Представление](fifth-layout.md)
     * [Небезопасный Rust](fifth-unsafe.md)
     * [Основы](fifth-basics.md)
