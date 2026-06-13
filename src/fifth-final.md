@@ -1,20 +1,11 @@
-> # Final Code
-
 # Финальный код
 
-> Alright, so with a teeny-tiny dash of unsafety we managed to get a linear time improvement over the naive safe queue, and we managed to reuse almost all of the logic from the safe stack!
+Что ж, с небольшой долей небезопасности нам удалось добиться линейного улучшения времени по сравнению с наивной безопасной очередью, и мы смогли повторно использовать почти всю логику из безопасного стека!
 
-Ладно, с небольшой долей небезопасности нам удалось добиться линейного улучшения времени по сравнению с наивной безопасной очередью, и мы смогли повторно использовать почти всю логику из безопасного стека!
+За исключением той части, где miri полностью нас подвёл и нам пришлось писать небольшую магистерскую работу о модели памяти в Rust.
+Как это обычно и бывает.
 
-> You know, except for that part where miri completely dunked on us and we had to write a short master's thesis on rust's memory model.
-> You know, as you do.
-
-За, исключением той части, где miri полностью подвёл нас и нам пришлось писать небольшую магистерскую работу о модели памяти в Rust.
-Как это обычно бывает.
-
-> But on the bright side we *didn't* have to write any jank Rc or RefCell stuff.
-
-Но, светлая сторона в том, что нам *не пришлось* писать всех этих глючных Rc или RefCell.
+Но светлая сторона в том, что нам *не пришлось* писать всех этих ужасных Rc или RefCell.
 
 ```rust
 use std::ptr;
@@ -153,35 +144,35 @@ mod test {
     fn basics() {
         let mut list = List::new();
 
-        // Check empty list behaves right
+        // Проверяем, что пустой список ведёт себя правильно
         assert_eq!(list.pop(), None);
 
-        // Populate list
+        // Заполняем список
         list.push(1);
         list.push(2);
         list.push(3);
 
-        // Check normal removal
+        // Проверяем обычное удаление
         assert_eq!(list.pop(), Some(1));
         assert_eq!(list.pop(), Some(2));
 
-        // Push some more just to make sure nothing's corrupted
+        // Вставляем новые значения, просто чтобы проверить, что ничего не сломается
         list.push(4);
         list.push(5);
 
-        // Check normal removal
+        // Проверяем обычное удаление
         assert_eq!(list.pop(), Some(3));
         assert_eq!(list.pop(), Some(4));
 
-        // Check exhaustion
+        // Проверяем граничный случай
         assert_eq!(list.pop(), Some(5));
         assert_eq!(list.pop(), None);
 
-        // Check the exhaustion case fixed the pointer right
+        // Проверяем push после pop из пустого списка
         list.push(6);
         list.push(7);
 
-        // Check normal removal
+        // Проверяем обычное удаление
         assert_eq!(list.pop(), Some(6));
         assert_eq!(list.pop(), Some(7));
         assert_eq!(list.pop(), None);
@@ -258,7 +249,7 @@ mod test {
         assert!(list.peek() == Some(&5000));
         list.push(7);
 
-        // Drop it on the ground and let the dtor exercise itself
+        // Ну а здесь пусть запуститься деструктор
     }
 }
 ```
