@@ -422,8 +422,6 @@ MIRIFLAGS="-Zmiri-tag-raw-pointers" cargo +nightly-2022-01-21 miri run
 Ладно, мы видели, что сырые указатели можно свободно копировать и что с ними можно работать, считая, что копии «разделяют» единственное заимствование.
 Нельзя ли подобным образом думать и о разделяемых ссылках?
 
-> Let's test that out with a function that reads a value (`println!` can be a little magical with auto-ref/deref stuff, so I'm wrapping it in a function to make sure we're testing what we want to be):
-
 Давайте проверим наше предположение с помощью функции, которая читает значение.
 (Макрос `println! может работать волшебным образом, когда речь заходит о получении и разыменовании ссылок, так что я завернула его в функцию, чтобы быть уверенной, что мы тестируем то, что нужно):
 
@@ -472,9 +470,6 @@ warning: `miri-sandbox` (bin "miri-sandbox") generated 1 warning
 10
 11
 ```
-
-> Oh yeah we forgot to do anything with raw pointers, but at least we can see that it's fine for all the shared references to be used interchangeably.
-> Now let's mix in some raw pointers:
 
 Ах, да, мы не делаем с сырыми указателями ничего потенциально опасного, поэтому компилятор ругается на нужный `unsafe`.
 Но, по крайней мере мы видим, что использовать разделяемые указатели совместно — вполне нормально.

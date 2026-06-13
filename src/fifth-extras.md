@@ -316,8 +316,6 @@ pub fn peek_mut(&mut self) -> Option<&mut T> {
 }
 ```
 
-> I guess I am going to *continue* to make mistakes, so we're going to be extra careful and add a new test I'm going to call "miri food": something that just messes around and mixes up our APIs a bunch to help miri catch our mistakes.
-
 Полагаю, я всё-таки *буду* ошибаться время от времени, так что мы добавим новый тест, который я назову «приманка для miri»: что-то, что вызывает наши методы в произвольном порядке и помогает miri искать наши ошибки.
 
 ```rust ,ignore
