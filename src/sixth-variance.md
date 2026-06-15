@@ -139,12 +139,6 @@ struct Node<T> {
 }
 ```
 
-> But how is Rust actually deciding the variance of things?
-> Well in the good-old-days before 1.0 we messed around with just letting people specify the variance they wanted and... it was an absolute train-wreck!
-> Subtyping and variance is really hard to wrap your head around, and core developers genuinely disagreed on basic terminology!
-> So we moved to a "variance by example" approach: the compiler just looks at your fields and copies their variances.
-> If there's any kind of disagreement, then invariance always wins, because that's safe.
-
 Но как на самом деле Rust принимает решение о вариантности типов?
 В старые добрые времена (до версии 1.0) мы разрешали людям просто указывать нужную им вариантность... и это был полный провал!
 Подтипы и вариантность — действительно сложные понятия.

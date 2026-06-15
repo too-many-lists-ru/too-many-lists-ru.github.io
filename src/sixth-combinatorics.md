@@ -473,11 +473,12 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // While self.front == self.back is a tempting condition to check here,
-        // it won't do the right for yielding the last element! That sort of
-        // thing only works for arrays because of "one-past-the-end" pointers.
+        // Хотя условие self.front == self.back кажется очевидным,
+        // оно не подходит для возврата последнего элемента! Подобный код
+        // работает только с массивами из-за указателя «на элемент, следующий
+        // за последним»
         if self.len > 0 {
-            // We could unwrap front, but this is safer and easier
+            // Мы могли бы извлечь значение из front, но так быстрее и безопаснее
             self.front.map(|node| unsafe {
                 self.len -= 1;
                 self.front = (*node.as_ptr()).back;

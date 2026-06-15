@@ -146,9 +146,7 @@ pub fn peek_prev(&mut self) -> Option<&mut T> {
 Далее у нас есть выбор: мы можем сразу заняться split и splice, центральной темой этого API, или мы можем сделать небольшой шажок, реализовав insert/remove для одного элемента.
 У меня такое чувство, что нам придётся реализовать insert/remove через split и splice, так что... давайте попробуем и посмотрим, как ляжет карта (честно говоря, понятия не имею, пока пишу эти строки).
 
-# Метод split
-
-> First up, split_before and split_after, which return everything before/after the current element as a LinkedList (stopping at the ghost element, unless you're at the ghost, in which case we just return the whole List and the cursor now points to an empty list):
+# Разбиение
 
 Итак, split_before и split_after возвращают всё до/после текущего элемента в виде LinkedList (и останавливаются на псевдоэлементе, а если они сразу находятся на псевдоэлементе, то возвращают весь список, а курсор после этого указывает на пустой список).
 
@@ -274,28 +272,17 @@ if let Some(prev) = prev {
 
 # Вставка
 
-> Just one more boss to fight, splice_before and splice_after, which I expect to be the corner-casiest one of them all.
-> The two functions *take in* a LinkedList and grafts its contents into outrs.
-> Our list could be empty, their list could be empty, we've got ghosts to deal with... *sigh* let's just take it one step at a time with splice_before.
-
-Остался последний босс, с которым нужно сразиться — splice_before и splice_after, которые, похоже, будут содержать больше всего граничных случаев.
+Остался последний босс, с которым нужно сразиться — splice_before и splice_after.
+И в них, похоже, будет больше всего граничных случаев.
 Эти функции *принимают на вход* один LinkedList и вставляют его содержимое в наш список.
 Наш список может быть пустым, их список может быть пустым, нужно что-то решать с псевдоэлементами...
 *вздыхает* Давайте просто действовать шаг за шагом на примере splice_before.
 
-> * If their list is empty, we don't need to do anything. 
-> * If our list is empty, then our list just becomes their list.
-> * If we're pointing at the ghost, then this appends to the back (change list.back)
-> * If we're pointing at the first element (0), this this appends to the front (change list.front)
-> * In the general case, we do a whole lot of pointer fuckery.
-
-* Если их список пустой, мы ничего не делаем
+* Если их список пустой, ничего не делаем
 * Если наш список пустой, тогда их список становится нашим списком
 * Если мы указываем на псевдоэлемент, их список добавляется сзади (изменяя list.back)
-* Если мы указываем на первый элемент (0), их список добавляется впереди (изменяя list.front)
+* Если мы указываем на первый элемент (0), их список добавляется спереди (изменяя list.front)
 * В других случаях, мы очень много возимся с указателями.
-
-> The general case is this:
 
 Общий случай:
 
@@ -307,17 +294,11 @@ input.front -> 1 <-> 2 <- input.back
                     cur
 ```
 
-> Becoming this:
-
 Превращается в:
 
 ```text
 list.front -> A <-> 1 <-> 2 <-> B <-> C <- list.back
 ```
-
-> Ok?
-> Ok.
-> Let's write that out... *TAKES A HUGE BREATH AND PLUNGES IN*:
 
 Так?
 Так.
@@ -331,19 +312,16 @@ list.front -> A <-> 1 <-> 2 <-> B <-> C <- list.back
                 // Пустой входной список, ничего не делаем
             } else if let Some(cur) = self.cur {
                 if let Some(0) = self.index {
-                    // We're appending to the front, see append to back
                     // Добавляем спереди, сравните с добавлением сзади
                     (*cur.as_ptr()).front = input.back.take();
                     (*input.back.unwrap().as_ptr()).back = Some(cur);
                     self.list.front = input.front.take();
 
-                    // Index moves forward by input length
                     // Индекс увеличивается на длину входного списка
                     *self.index.as_mut().unwrap() += input.len;
                     self.list.len += input.len;
                     input.len = 0;
                 } else {
-                    // General Case, no boundaries, just internal fixups
                     // Общий случай, никаких граничных случаев:
                     // просто правим приватные поля
                     let prev = (*cur.as_ptr()).front.unwrap();
@@ -355,17 +333,12 @@ list.front -> A <-> 1 <-> 2 <-> B <-> C <- list.back
                     (*cur.as_ptr()).front = Some(in_back);
                     (*in_back.as_ptr()).back = Some(cur);
 
-                    // Index moves forward by input length
                     // Индекс увеличивается на длину входного списка
                     *self.index.as_mut().unwrap() += input.len;
                     self.list.len += input.len;
                     input.len = 0;
                 }
             } else if let Some(back) = self.list.back {
-                // We're on the ghost but non-empty, append to the back
-                // We can either `take` the input's pointers or `mem::forget`
-                // it. Using take is more responsible in case we do custom
-                // allocators or something that also needs to be cleaned up!
                 // Мы на псевдоэлементе и список не пуст, добавляем сзади.
                 // Мы можем вызывать для входных указателей либо `take`,
                 // либо `mem::forget`. Take корректнее, если мы используем
@@ -374,11 +347,9 @@ list.front -> A <-> 1 <-> 2 <-> B <-> C <- list.back
                 (*input.front.unwrap().as_ptr()).front = Some(back);
                 self.list.back = input.back.take();
                 self.list.len += input.len;
-                // Not necessary but Polite To Do
                 // Не обязательно, но вежливо
                 input.len = 0;
             } else {
-                // We're empty, become the input, remain on the ghost
                 // Наш список пуст, заменяем его на входной, остаёмся на псевдоэлементе
                 *self.list = input;
             }
@@ -386,44 +357,30 @@ list.front -> A <-> 1 <-> 2 <-> B <-> C <- list.back
     }
 ```
 
-> Ok this one is genuinely horrendous, and really is feeling that `Option<NonNull>` pain now.
-> But there's a lot of cleanups we can do.
-> For one, we can pull this code out to the very end, because we always want to do it.
-> I don't *love*  (although sometimes it's a noop, and setting `input.len` is more a matter of paranoia about future extensions to the code):
-
-Да, этот код по настоящему ужасен и я ощущаю всю боль от использования `Option<NonNull>`.
+Этот код по настоящему ужасен и я ощущаю всю боль от выбора `Option<NonNull>`.
 Но многое можно исправить.
-Во-первых, эти две строки можно вынести в самый конец, поскольку они нужным всегда.
-(Да, в некоторых сценариях они не обязательны, но ничего не ломают, а установка `input.len` вызвана, скорее, паранойей):
+Во-первых, эти две строки можно вынести в самый конец, поскольку они нужны всегда.
+(согласна, в некоторых сценариях они не обязательны, но ничего не ломают, а установка `input.len` вызвана, скорее, паранойей):
 
 ```rust ,ignore
 self.list.len += input.len;
 input.len = 0;
 ```
 
-> > Use of moved value: `input`
-
 > Использование перемещённого значения: `input`
-
-> Ah, right, in the "we're empty" case we're moving the list.
-> Let's replace that with a swap:
 
 Ах, да, в случае «наш список пуст» мы перемещаем `list`.
 Заменим эту строку на вызов swap:
 
 ```rust ,ignore
-// We're empty, become the input, remain on the ghost
 // Наш список пуст, заменяем его на входной, остаёмся на псевдоэлементе
 std::mem::swap(self.list, &mut input);
 ```
 
-> In this case the writes will be pointless, but, they still work (we could probably also early-return in this branch to appease the compiler).
+В этом случае операторы, меняющие значения `self.list.len` и `input.len`, не делают ничего, так как значения уже корректны, но они ничего и не ломают (и, в принципе, мы могли бы сделать в этом месте ранний возврат из функции).
 
-В этом случае операторы, меняющие значения `self.list.len` и `input.len`, не делают ничего, так значения, уже корректны, но они ничего и не ломают (и, в принципе, мы могли бы сделать в этом месте ранний возврат из функции).
-
-> This unwrap is just a consequence of me thinking about the cases backwards, and can be fixed by making the if-let ask the right question:
-
-Вызов unwrap вызван тем, что я рассматривала варианты в неудобном порядке и его можно убрать, если мы правильно зададим вопрос в операторе if-let:
+Вызов unwrap вызван тем, что я рассматривала варианты в неудобном порядке.
+От него можно избавиться, если мы правильно зададим вопрос в операторе if-let:
 
 ```rust ,ignore
 if let Some(0) = self.index {
@@ -433,27 +390,20 @@ if let Some(0) = self.index {
 }
 ```
 
-> Adjusting the index is duplicated inside the branches, so can also be hoisted out:
-
-Корректировка индекса повторяется в обоих ветках, так что её тоже можно вынести наружу:
+Корректировка индекса повторяется в обоих ветках, так что и её можно вынести наружу:
 
 ```rust
 *self.index.as_mut().unwrap() += input.len;
 ```
 
-> Ok, putting that all together we get this:
-
-Итак, сложив всё воедино, получаем:
+Сложив всё воедино, получаем:
 
 ```rust
 if input.is_empty() {
-    // Input is empty, do nothing.
     // Пустой входной список, ничего не делаем
 } else if let Some(cur) = self.cur {
-    // Both lists are non-empty
     // Оба списка не пустые
     if let Some(prev) = (*cur.as_ptr()).front {
-        // General Case, no boundaries, just internal fixups
         // Общий случай, никаких граничных случаев:
         // просто правим приватные поля
         let in_front = input.front.take().unwrap();
@@ -464,20 +414,14 @@ if input.is_empty() {
         (*cur.as_ptr()).front = Some(in_back);
         (*in_back.as_ptr()).back = Some(cur);
     } else {
-        // We're appending to the front, see append to back below
         // Добавляем спереди, сравните с добавлением сзади
         (*cur.as_ptr()).front = input.back.take();
         (*input.back.unwrap().as_ptr()).back = Some(cur);
         self.list.front = input.front.take();
     }
-    // Index moves forward by input length
     // Индекс увеличивается на длину входного списка
     *self.index.as_mut().unwrap() += input.len;
 } else if let Some(back) = self.list.back {
-    // We're on the ghost but non-empty, append to the back
-    // We can either `take` the input's pointers or `mem::forget`
-    // it. Using take is more responsible in case we do custom
-    // allocators or something that also needs to be cleaned up!
     // Мы на псевдоэлементе и список не пуст, добавляем сзади.
     // Мы можем вызывать для входных указателей либо `take`,
     // либо `mem::forget`. Take корректнее, если мы используем
@@ -487,58 +431,42 @@ if input.is_empty() {
     self.list.back = input.back.take();
 
 } else {
-    // We're empty, become the input, remain on the ghost
     // Наш список пуст, заменяем его на входной, остаёмся на псевдоэлементе
     std::mem::swap(self.list, &mut input);
 }
 
 self.list.len += input.len;
-// Not necessary but Polite To Do
 // Не обязательно, но вежливо
 input.len = 0;
 
-// Input dropped here
 // input освобождается здесь
 ```
 
-> Alright this still sucks, but mostly because of -- nope ok just spotted a bug:
-
-Ладно, это всё ещё отстой, но в основном из-за... нет, так, только что нашла ошибку:
+Ладно, это всё ещё отстой, но, в основном из-за... нет, так, я только что нашла ошибку:
 
 ```rust
     (*back.as_ptr()).back = input.front.take();
     (*input.front.unwrap().as_ptr()).front = Some(back);
 ```
 
-> We `take` input.front and then unwrap it on the next line! *sigh* and we do the same thing in the equivalent mirror case.
-> We would have caught this instantly in tests, but, we're trying to be Perfect now, and I'm just kinda doing this live, and this is the exact moment where I saw it.
-> This is what I get for not being my usual tedious self and doing things in phases.
-> More explicit!
-
-Мы вызываем `take` у `input.front` и затем вызываем `unwrap` буквально на следующей строке!
-*вздыхает* и мы делаем то же самое в эквивалентном зеркальном методе.
-Мы бы нашли эту ошибку с помощью тестов, но сейчас я пытаюсь быть Идеальной и пишу код в режиме реального времени, и я увидела эту ошибку только что.
-Вот что бывает, когда выполняешь работу не так, как привыкла, не в том порядке.
-Больше ясности в коде!
+Мы вызываем `take` у `input.front` и затем, буквально на следующей строке вызываем `unwrap`!
+*вздыхает* и то же самое мы делаем в эквивалентном зеркальном методе.
+Мы бы нашли эту ошибку с помощью тестов, но сейчас я пытаюсь быть Идеальной и пишу код в режиме реального времени, так что я увидела эту ошибку только что.
+Вот что бывает, когда выполняешь работу не так, как привыкла, и не в том порядке.
+Даёшь больше ясности в коде!
 
 ```rust
-// We can either `take` the input's pointers or `mem::forget`
-// it. Using `take` is more responsible in case we ever do custom
-// allocators or something that also needs to be cleaned up!
 // Мы можем вызывать для входных указателей либо `take`,
 // либо `mem::forget`. Take корректнее, если мы используем
 // собственный аллокатор или что-то, что тоже требует очистки!
 if input.is_empty() {
-    // Input is empty, do nothing.
     // Пустой входной список, ничего не делаем
 } else if let Some(cur) = self.cur {
-    // Both lists are non-empty
     // Оба списка не пустые
     let in_front = input.front.take().unwrap();
     let in_back = input.back.take().unwrap();
 
     if let Some(prev) = (*cur.as_ptr()).front {
-        // General Case, no boundaries, just internal fixups
         // Общий случай, никаких граничных случаев:
         // просто правим приватные поля
         (*prev.as_ptr()).back = Some(in_front);
@@ -546,17 +474,14 @@ if input.is_empty() {
         (*cur.as_ptr()).front = Some(in_back);
         (*in_back.as_ptr()).back = Some(cur);
     } else {
-        // No prev, we're appending to the front
         // Нет предыдущего элемента, добавляем спереди
         (*cur.as_ptr()).front = Some(in_back);
         (*in_back.as_ptr()).back = Some(cur);
         self.list.front = Some(in_front);
     }
-    // Index moves forward by input length
     // Индекс увеличивается на длину входного списка
     *self.index.as_mut().unwrap() += input.len;
 } else if let Some(back) = self.list.back {
-    // We're on the ghost but non-empty, append to the back
     // Мы на псевдоэлементе и список не пуст, добавляем сзади.
     let in_front = input.front.take().unwrap();
     let in_back = input.back.take().unwrap();
@@ -565,43 +490,27 @@ if input.is_empty() {
     (*in_front.as_ptr()).front = Some(back);
     self.list.back = Some(in_back);
 } else {
-    // We're empty, become the input, remain on the ghost
     // Наш список пуст, заменяем его на входной, остаёмся на псевдоэлементе
     std::mem::swap(self.list, &mut input);
 }
 
 self.list.len += input.len;
-// Not necessary but Polite To Do
 // Не обязательно, но вежливо
 input.len = 0;
 
-// Input dropped here
 // input освобождается здесь
 ```
 
-> Alright now this, this I can tolerate.
-> The only complaints I have are that we don't dedupe in_front/in_back (probably we could rejig our conditions but eh whatever).
-> Really this is basically what you would write in C but with `Option<NonNull>` gunk making it tedious.
-> I can live with that.
-> Well no we should just make raw pointers better for this stuff.
-> But, out of scope for this book.
-
 Ладно, с таким кодом уже можно смириться.
-Единственный недостаток в том, что мы два раза инициализируем in_front/in_back (возможно мы могли бы поправить наши условия, но не суть).
+Единственный его недостаток в том, что мы два раза инициализируем in_front/in_back (возможно мы могли бы поправить наши условия, но не суть).
 Подобный код мы бы написали и на C, но `Option<NonNull>` делает его многословным.
 С этим можно жить.
-Ладно, нам надо сделать сырые указатели более удобными для решения таких задач.
+По уму, надо сделать сырые указатели удобнее для решения таких задач.
 Но это выходит за рамки этой книги.
 
-> Anyway, I am absolutely exhausted after that, so, `insert` and `remove` and all the other APIs can be left as an excercise to the reader. 
+В любом случае, я абсолютно измучена, так что `insert`, `remove` и все остальные методы оставляю читателю в качестве упражнения.
 
-В любом случае, я абсолютно измучена после этого, так что `insert`, `remove` и все остальные методы оставляю в качестве упражнения читателю.
-
-> Here's the final code for our Cursor with my attempt at copy-pasting the combinatorics.
-> Did I get it right?
-> I'll only find out when I write the next chapter and test this monstrosity!
-
-Вот финальный код нашего курсора вместе с копи-пастой комбинаторных методов.
+Финальный код нашего курсора вместе с копи-пастой комбинаторных методов.
 Всё ли здесь правильно?
 Это я узнаю только после написания следующего раздела и тестирования этого монстра!
 

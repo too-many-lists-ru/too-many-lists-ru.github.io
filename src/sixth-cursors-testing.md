@@ -263,7 +263,6 @@ pub fn peek_next(&mut self) -> Option<&mut T> {
 pub fn peek_prev(&mut self) -> Option<&mut T> {
     unsafe {
         let prev = if let Some(cur) = self.cur {
-            // Normal case, try to follow the cur node's front pointer
             // Обычный вариант, пытаемся следовать переднему указателю текущего узла
             (*cur.as_ptr()).front
         } else {
