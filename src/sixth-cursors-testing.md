@@ -1,18 +1,9 @@
-> # Testing Cursors
-
 # Тестирование Курсоров
 
-> Time to find out how many horribly embarassing mistakes I made in the previous section!
+Время узнать, сколько ужасных и неловких ошибок я допустила в предыдущем разделе!
 
-Время узнать, сколько ужасных неловких ошибок я сделала в предыдущем разделе!
-
-> Oh god we made our API unlike both std and the old impl.
-> Alright well I'm just gonna hastily cobble together something from both of them.
-> Yeah let's "borrow" these tests from std:
-
-Господи, наш API отличается, как от стандартной библиотеки, так и от моей старой реализации.
-Ладно, я просто наспех соберу что-то работающее из них обеих.
-Да, давайте «позаимствуем» эти тесты из стандартной реализации:
+К несчастью, наш API отличается, как от стандартной библиотеки, так и от моей старой реализации, так что мне придётся собирать работающие тесты из них обеих.
+Эти тесты «позаимствуем» из стандартной реализации:
 
 ```rust ,ignore
     #[test]
@@ -74,7 +65,7 @@
         check_links(&m);
         assert_eq!(m.iter().cloned().collect::<Vec<_>>(), &[10, 7, 1, 8, 2, 3, 4, 5, 6, 9]);
         
-        /* remove_current not impl'd
+        /* удаляем, сейчас не реализовано:
         let mut cursor = m.cursor_mut();
         cursor.move_next();
         cursor.move_prev();
@@ -126,12 +117,9 @@
     }
 
     fn check_links<T>(_list: &LinkedList<T>) {
-        // would be good to do this!
         // было бы неплохо написать!
     }
 ```
-
-> Moment of truth!
 
 Момент истины!
 
@@ -179,15 +167,11 @@ failures:
 test result: FAILED. 12 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-> I'll admit, I had some hubris here and was hoping I nailed it.
-> This is why we write tests (but maybe I just did a bad job of porting the tests..?).
+Признаюсь, я была немного самонадеянна и думала, что всё сделала правильно.
+Вот почему мы пишем тесты.
+Впрочем, может быть, я их просто неаккуратно скопи-пастила?
 
-Признаюсь, я была немного самонадеянна, и надеялась, что всё сделала правильно.
-Вот почему мы пишем тесты (но, может быть, я просто плохо перенесла тесты?..).
-
-> What's the first failure?
-
-Какова первая ошибка?
+В чём первая ошибка?
 
 ```rust ,ignore
 let mut m: LinkedList<u32> = LinkedList::new();
@@ -205,17 +189,10 @@ assert_eq!(cursor.current(), None);
 assert_eq!(cursor.peek_next(), Some(&mut 1)); // DIES HERE
 ```
 
-> Geez I really messed up some basic functionality.
-> Wait,
-
 Блин, я и правда накосячила с базовой функциональностью.
 Подождите,
 
-> > Head empty, Option methods and (omitted) compiler errors do all thinking now.
-
 > Даже думать не пришлось, всю работу сделали методы Option и (опущенные) ошибки компилятора.
-
-> Well I am nothing if not honest.
 
 Что ж, я человек честный.
 
@@ -229,13 +206,9 @@ pub fn peek_next(&mut self) -> Option<&mut T> {
 }
 ```
 
-> ...Yeah this is just wrong.
-> If `self.cur` is None, we aren't just supposed to give up, we need to check `self.list.front` too, because we're on the ghost!
-> So we just need to add an or_else to the chain:
-
 Да, это просто неправильно.
 Если `self.cur` равен `None`, мы не должны завершать проверку, мы должны также проверить `self.list.front`, потому что находимся над псевдоэлементом!
-Так что нам надо добавить в цепочку вызов or_else:
+Так что нам надо добавить or_else в цепочку вызов:
 
 ```rust ,ignore
 pub fn peek_next(&mut self) -> Option<&mut T> {
@@ -257,8 +230,6 @@ pub fn peek_prev(&mut self) -> Option<&mut T> {
 }
 ```
 
-> Did that fix it?
-
 Помогло?
 
 ```text
@@ -268,28 +239,22 @@ thread 'test::test_cursor_move_peek' panicked at 'assertion failed: `(left == ri
  right: `None`', src\lib.rs:1078:9
 ```
 
-> Wait now it's wrong *further back*.
-> Ok I need to stop head-emptying peek because apparently it's a lot harder than I was willing to give it credit for.
-> Just trying to blindly chain these cases is a disaster, let's have a proper if for the cases of ghost vs not:
-
 Подождите, теперь ошибка *сдвинулась на элемент назад*.
 Ладно, мне надо остановить своё «даже думать не пришлось» в отношении peek, потому что, оказывается, всё намного сложнее, чем я представляла.
-Просто пытаться увязать в цепочку все эти варианты — это катастрофа, так что давайте добавим явное условие if для псевдоэлемента и обычного элемента:
+Просто пытаться связать в цепочку все эти варианты — как мы видим, не работает.
+Давайте добавим явное условие if для псевдоэлемента и обычного элемента:
 
 ```rust ,ignore
 pub fn peek_next(&mut self) -> Option<&mut T> {
     unsafe {
         let next = if let Some(cur) = self.cur {
-            // Normal case, try to follow the cur node's back pointer
-            // Обычный вариант, пытаемся следовать указателю назад текущего узла
+            // Обычный вариант, пытаемся следовать заднему указателю текущего узла
             (*cur.as_ptr()).back
         } else {
-            // Ghost case, try to use the list's front pointer
             // Псевдоэлемент, пытаемся использовать передний указатель списка
             self.list.front
         };
 
-        // Yield the element if the next node exists
         // Возвращаем элемент, если следующий узел существует
         next.map(|node| &mut (*node.as_ptr()).elem)
     }
@@ -299,22 +264,18 @@ pub fn peek_prev(&mut self) -> Option<&mut T> {
     unsafe {
         let prev = if let Some(cur) = self.cur {
             // Normal case, try to follow the cur node's front pointer
-            // Обычный вариант, пытаемся следовать указателю вперёд текущего узла
+            // Обычный вариант, пытаемся следовать переднему указателю текущего узла
             (*cur.as_ptr()).front
         } else {
-            // Ghost case, try to use the list's back pointer
             // Псевдоэлемент, пытаемся использовать задний указатель списка
             self.list.back
         };
 
-        // Yield the element if the prev node exists
         // Возвращаем элемент, если предыдущий узел существует
         prev.map(|node| &mut (*node.as_ptr()).elem)
     }
 }
 ```
-
-> Feelin' confident about this one!
 
 Ну, в этом коде я уверена!
 
@@ -334,18 +295,11 @@ failures:
 test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-> Yesss.
-> Ok one more failure to go... oh.
-
 Даааа.
-Осталась последняя ошибка... уф.
-
-> Did you notice the part where I commented out some code for testing remove_current?
-> Yeah I wasn't paying attention to the fact that this test is stateful.
-> Let's just create a new list with the state the remove_current part would have left us in:
+Что ж, осталась одна ошибка... уф.
 
 Вы заметили, что я закомментировала часть кода, предназначенного для тестирования remove_current?
-Да, я не обратила внимания на то, что этот тест меняет состояние.
+Оказывается, я не обратила внимания, что этот тест меняет состояние.
 Давайте просто создадим новый список в том виде, в каком бы его оставил вызов remove_current:
 
 ```rust ,ignore
@@ -385,10 +339,7 @@ test src\lib.rs - assert_properties::iter_mut_invariant (line 803) - compile fai
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
 ```
 
-> Heyyyy look at thaaat... ok now I'm getting paranoid.
-> Let's properly fill in check_links and test it under miri:
-
-Эээй, только взгляните на... ладно, теперь я начинаю параноить.
+Эээй, только взгляните на... ладно, у уже начинаю параноить.
 Давайте аккуратно заполним check_links и протестируем его в miri:
 
 ```rust ,ignore
@@ -400,11 +351,6 @@ fn check_links<T: Eq + std::fmt::Debug>(list: &LinkedList<T>) {
     assert_eq!(from_front, re_reved);
 }
 ```
-
-> Is this the best way to do this?
-> No.
-> Is it fine?
-> Yes.
 
 Это лучшим способ проверки?
 Нет.
@@ -444,41 +390,21 @@ test src\lib.rs - assert_properties::iter_mut_invariant (line 803) - compile fai
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
 ```
 
-> DONE.
-
 ГОТОВО.
-
-> Done.
 
 Готово.
 
-> We did it.
-> We made a god damn production-quality LinkedList, with basically all the same functionality as the one in std.
-> Are we missing little convenience methods here and there?
-> Absolutely.
-> Will I add them into the final published version of the crate?
-> Probably!
-
 У нас получилось.
-Мы сделали связный список офигенно продуктового уровня, практически со всей функциональность аналоги из стандартной библиотеки.
-Нам не хватает пары удобных методов там и тут?
+Мы сделали связный список офигенно продуктового уровня, практически со всеми функциями из стандартной библиотеки.
+Нам не хватает пары удобных методов?
 Никаких сомнений.
-Добавлю ли я их чуть позже?
+Добавлю ли я их позже?
 Возможно!
-
-> But, I am, So Very Tired.
 
 Но Сейчас Я Очень Устала.
 
-> So.
-> We win.
-
 В любом случае.
 Мы победили.
-
-> Wait fuck.
-> We're being production quality.
-> Ok one last final boss: clippy.
 
 Блин, подождите.
 Нам же нужно продуктовое качество.
@@ -539,26 +465,14 @@ warning: `linked-list` (lib) generated 4 warnings
     Finished dev [unoptimized + debuginfo] target(s) in 0.29s
 ```
 
-> Alright clippy, let's do this.
-
 Ладно, clippy, добьём.
-
-> Complaint 1 (and 3): we use `while let Some(_) = ` instead of `while .is_some()`.
-> The loop is empty so this truly doesn't matter but ok fine, clippy, I'll do things your way.
 
 Предупреждение 1 (и 3): мы используем `while let Some(_) = ` вместо `while .is_some()`.
 Тело цикла пустое, так что писать можно как угодно, но, хорошо, clippy, я сделаю по твоему.
 
-> Complaint 2: We have an actual inherent into_iter method.
-> Wait, what *checks std* ok, point to clippy.
-> IntoIterator is in the prelude (and basically a lang item) so, we don't need an inherent version too.
-
 Предупреждение 2: У нас уже есть унаследованный метод into_iter.
-Подожди, что... *проверяет стандартную библиотеку*... ладно, очко уходит clippy.
+Подождите, что... *проверяет стандартную библиотеку*... ладно, очко уходит clippy.
 IntoIterator уже есть в прелюдии (и по сути является языковым примитивом), так что нам не нужна своя версия into_iter.
-
-> Complaint 4: we copied a weird cargocult from std.
-*shrug* fine I'll remove it.
 
 Предупреждение 4: мы скопировали кусок странного карго-кода из стандартной библиотеки.
 *пожимает плечами* ладно, просто удалю его.
@@ -568,22 +482,14 @@ cargo clippy
     Finished dev [unoptimized + debuginfo] target(s) in 0.00s
 ```
 
-> Nice.
-> Just one last thing to do before calling it production quality: fmt.
-
 Прекрасно.
-Ещё одна последняя вещь, прежде чем мы сможем считать наш код кодом продуктового уровня: fmt.
+Ещё одно, прежде чем мы сможем считать наш код продуктовым: fmt.
 
 ```text
 cargo fmt
 ```
 
-> ...yeah it added some newlines and removed some trailing whitespace.
-> Nothing interesting.
-
-...так, он добавил несколько новый строк и удалил несколько пробелов в конце строки.
+...так, он добавил несколько новый строк и удалил несколько конечных пробелов.
 Ничего интересного.
-
-> **WE ARE NOW TRULY FINALLY DONE!!!!!!!!!!!!!!!!!!!!!**
 
 **НАКОНЕЦ, МЫ И ПРАВДА ЗАКОНЧИЛИ!!!**

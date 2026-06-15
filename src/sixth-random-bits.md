@@ -1,12 +1,6 @@
-> # Filling In Random Bits
-
 # Всякая всячина
 
-> Hey you said you wanted to be production-quality, didn't you? 
-
-Эй, вы же говорили, что хотите продуктового кода, нет?
-
-> Here's some more random gunk to toss in to be a "good" collection:
+Вы говорили, что хотите продуктового кода, нет?
 
 Вот немного всякой всячины, чтобы получилась «хорошая» коллекция:
 
@@ -17,16 +11,13 @@ impl<T> LinkedList<T> {
     }
 
     pub fn clear(&mut self) {
-        // Oh look it's drop again
         // О, смотрите, это снова drop
         while let Some(_) = self.pop_front() { }
     }
 }
 ```
 
-> And now we've got a bunch of traits to implement that everyone expects:
-
-Теперь нам надо реализовать множество типажей, которые все ждут от коллекции:
+Теперь реализуем набор типажей, которые должны быть у коллекции:
 
 ```rust ,ignore
 impl<T> Default for LinkedList<T> {
@@ -101,41 +92,22 @@ impl<T: Hash> Hash for LinkedList<T> {
 }
 ```
 
-> I definitely wrote all of these from scratch, and didn't just copy the std impls.
-> Because they're so interesting, and I definitely remember the subtleties of manually implementing Hash.
-> Yeah, that's something I think about All The Time...
-
-Я написала всё это с нуля, а не просто скопировала из стандартной библиотеки.
-Потому что всё здесь такое интересное и я определённо помню все тонкости ручной реализации Hash.
+Я написала весь код с нуля, а не просто скопировала из стандартной библиотеки.
+Здесь всё такое интересное и я определённо помню все тонкости ручной реализации Hash.
 Да, я постоянно думаю об этом...
 
-> Ok there's actually a few things worth noting here.
-
-Ладно, здесь действительно есть несколько моментов, на которые надо обратить внимание.
-
-> First, a nasty namespace clash.
-> For whatever reason std now has macros named Hash and Debug, and so if you don't have the traits imported, you'll get really cryptic errors about macros instead of the proper "missing trait".
+Ладно, здесь действительно есть пара моментов, на которые надо обратить внимание.
 
 Во-первых, неприятный конфликт пространств имён.
 По какой-то причине в стандартной библиотеке теперь есть макросы с именами Hash и Debug, так что если вы не импортировали типажи, вы получите поистине таинственные ошибки о макросах вместо простого «типаж не найден».
-
-> The other intersting thing to talk about is Hash itself.
-> Do you see how we hash in `len`?
-> That's actually really important!
-> If collections don't hash in lengths, [they can accidentally make themselves vulnerable to prefix collisions](https://doc.rust-lang.org/std/hash/trait.Hash.html#prefix-collisions).
-> For instance, what distinguishes `["he", "llo"]` from `["hello"]`?
-> If no one is hashing lengths or some other "separator", nothing!
-> Making it too easy for hash collisions to accidentally or maliciously happen can result in serious sadness, so just do it!
 
 Другая интересная вещь касается самого Hash.
 Вы видите, что мы вызываем hash у `len`?
 Это на самом деле важно!
 Если коллекции не учитывают свою длину при вычислении хеша, [они могут случайно стать уязвимыми для коллизии префиксов](https://doc.rust-lang.org/std/hash/trait.Hash.html#prefix-collisions).
-Например, чем отличается `["he", "llo"]` от `["hello"]`?
+Например, чем отличаются `["he", "llo"]` и `["hello"]`?
 Если при вычислении хеша вы не используете длину или какой-то разделитель, то ничем!
-Слишком высокая вероятность коллизий при вычислении хеша может привести к большим неприятностям, так что просто напишите так, как надо!
-
-> Alright, here's our current code:
+Слишком высокая вероятность коллизий при вычислении хеша может привести к большим неприятностям, так что просто напишите правильно!
 
 Хорошо, вот наш текущий код:
 
@@ -191,7 +163,7 @@ impl<T> LinkedList<T> {
     }
 
     pub fn push_front(&mut self, elem: T) {
-        // SAFETY: it's a linked-list, what do you want?
+        // БЕЗОПАСНОСТЬ: это связный список, что вы делаете?
         unsafe {
             let new = NonNull::new_unchecked(Box::into_raw(Box::new(Node {
                 front: None,
@@ -199,22 +171,25 @@ impl<T> LinkedList<T> {
                 elem,
             })));
             if let Some(old) = self.front {
-                // Put the new front before the old one
+                // Вставляем новый передний узел перед старым
                 (*old.as_ptr()).front = Some(new);
                 (*new.as_ptr()).back = Some(old);
             } else {
-                // If there's no front, then we're the empty list and need 
-                // to set the back too.
+                // Если переднего узла нет, у нас пустой список и нам надо
+                // установить и значение заднего узла.
+                debug_assert!(self.back.is_none());
+                debug_assert!(self.front.is_none());
+                debug_assert!(self.len == 0);
                 self.back = Some(new);
             }
-            // These things always happen!
+            // Этот код выполняется всегда!
             self.front = Some(new);
             self.len += 1;
         }
     }
 
     pub fn push_back(&mut self, elem: T) {
-        // SAFETY: it's a linked-list, what do you want?
+        // БЕЗОПАСНОСТЬ: это связный список, что вы делаете?
         unsafe {
             let new = NonNull::new_unchecked(Box::into_raw(Box::new(Node {
                 back: None,
@@ -222,15 +197,15 @@ impl<T> LinkedList<T> {
                 elem,
             })));
             if let Some(old) = self.back {
-                // Put the new back before the old one
+                // Вставляем новый задний узел перед старым
                 (*old.as_ptr()).back = Some(new);
                 (*new.as_ptr()).front = Some(old);
             } else {
-                // If there's no back, then we're the empty list and need 
-                // to set the front too.
+                // Если заднего узла нет, у нас пустой список и нам надо
+                // установить и значение переднего узла.
                 self.front = Some(new);
             }
-            // These things always happen!
+            // Этот код выполняется всегда!
             self.back = Some(new);
             self.len += 1;
         }
@@ -238,52 +213,53 @@ impl<T> LinkedList<T> {
 
     pub fn pop_front(&mut self) -> Option<T> {
         unsafe {
-            // Only have to do stuff if there is a front node to pop.
+            // Будем что-то делать, только если у списка есть передний узел.
             self.front.map(|node| {
-                // Bring the Box back to life so we can move out its value and
-                // Drop it (Box continues to magically understand this for us).
+                // Возвращаем к жизни Box, так что можно извлечь и уничтожить его
+                // значение (Box магически делает это за нас).
                 let boxed_node = Box::from_raw(node.as_ptr());
                 let result = boxed_node.elem;
 
-                // Make the next node into the new front.
+                // Делаем следующий узел новым передним узлом.
                 self.front = boxed_node.back;
                 if let Some(new) = self.front {
-                    // Cleanup its reference to the removed node
+                    // Убираем ссылку переднего узла на удалённый узел.
                     (*new.as_ptr()).front = None;
                 } else {
-                    // If the front is now null, then this list is now empty!
+                    // Если передний узел равен null, значит, список пустой!
+                    debug_assert!(self.len == 1);
                     self.back = None;
                 }
 
                 self.len -= 1;
                 result
-                // Box gets implicitly freed here, knows there is no T.
+                // Здесь Box неявным образом освобождается, потому что больше нет T.
             })
         }
     }
 
     pub fn pop_back(&mut self) -> Option<T> {
         unsafe {
-            // Only have to do stuff if there is a back node to pop.
+            // Будем что-то делать, только если у списка есть задний узел.
             self.back.map(|node| {
-                // Bring the Box front to life so we can move out its value and
-                // Drop it (Box continues to magically understand this for us).
+                // Возвращаем к жизни Box, так что можно извлечь и уничтожить его
+                // значение (Box магически делает это за нас).
                 let boxed_node = Box::from_raw(node.as_ptr());
                 let result = boxed_node.elem;
 
-                // Make the next node into the new back.
+                // Делаем следующий узел новым задним узлом.
                 self.back = boxed_node.front;
                 if let Some(new) = self.back {
-                    // Cleanup its reference to the removed node
+                    // Убираем ссылку заднего узла на удалённый узел.
                     (*new.as_ptr()).back = None;
                 } else {
-                    // If the back is now null, then this list is now empty!
+                    // Если задний узел равен null, значит, список пустой!
                     self.front = None;
                 }
 
                 self.len -= 1;
                 result
-                // Box gets implicitly freed here, knows there is no T.
+                // Здесь Box неявным образом освобождается, потому что больше нет T.
             })
         }
     }
@@ -352,7 +328,7 @@ impl<T> LinkedList<T> {
 
 impl<T> Drop for LinkedList<T> {
     fn drop(&mut self) {
-        // Pop until we have to stop
+        // Вызываем pop, пока есть элементы
         while let Some(_) = self.pop_front() { }
     }
 }
@@ -441,11 +417,12 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // While self.front == self.back is a tempting condition to check here,
-        // it won't do the right for yielding the last element! That sort of
-        // thing only works for arrays because of "one-past-the-end" pointers.
+        // Хотя условие self.front == self.back кажется очевидным,
+        // оно не подходит для возврата последнего элемента! Подобный код
+        // работает только с массивами из-за указателя «на элемент, следующий
+        // за последним»
         if self.len > 0 {
-            // We could unwrap front, but this is safer and easier
+            // Мы могли бы извлечь значение из front, но так быстрее и безопаснее
             self.front.map(|node| unsafe {
                 self.len -= 1;
                 self.front = (*node.as_ptr()).back;
@@ -494,11 +471,12 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // While self.front == self.back is a tempting condition to check here,
-        // it won't do the right for yielding the last element! That sort of
-        // thing only works for arrays because of "one-past-the-end" pointers.
+        // Хотя условие self.front == self.back кажется очевидным,
+        // оно не подходит для возврата последнего элемента! Подобный код
+        // работает только с массивами из-за указателя «на элемент, следующий
+        // за последним»
         if self.len > 0 {
-            // We could unwrap front, but this is safer and easier
+            // Мы могли бы извлечь значение из front, но так быстрее и безопаснее
             self.front.map(|node| unsafe {
                 self.len -= 1;
                 self.front = (*node.as_ptr()).back;
@@ -534,15 +512,6 @@ impl<'a, T> ExactSizeIterator for IterMut<'a, T> {
     }
 }
 
-impl<T> IntoIterator for LinkedList<T> {
-    type IntoIter = IntoIter<T>;
-    type Item = T;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.into_iter()
-    }
-}
-
 impl<T> Iterator for IntoIter<T> {
     type Item = T;
 
@@ -567,7 +536,6 @@ impl<T> ExactSizeIterator for IntoIter<T> {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::LinkedList;
@@ -576,12 +544,12 @@ mod test {
     fn test_basic_front() {
         let mut list = LinkedList::new();
 
-        // Try to break an empty list
+        // Пытаемся сломать пустой список
         assert_eq!(list.len(), 0);
         assert_eq!(list.pop_front(), None);
         assert_eq!(list.len(), 0);
 
-        // Try to break a one item list
+        // Пытаемся сломать список из одного элемента
         list.push_front(10);
         assert_eq!(list.len(), 1);
         assert_eq!(list.pop_front(), Some(10));
@@ -589,7 +557,7 @@ mod test {
         assert_eq!(list.pop_front(), None);
         assert_eq!(list.len(), 0);
 
-        // Mess around
+        // Всё перемешиваем
         list.push_front(10);
         assert_eq!(list.len(), 1);
         list.push_front(20);
