@@ -1,18 +1,10 @@
-> # The Double Singly-Linked List
-
 # Двойной односвязный список
 
-> We struggled with doubly-linked lists because they have tangled ownership semantics: no node strictly owns any other node.
-> However we struggled with this because we brought in our preconceived notions of what a linked list *is*.
-> Namely, we assumed that all the links go in the same direction.
-
-У нас возникли трудности при работе с двусвязными списками, потому что у них сложная семантика владения: строго говоря, ни один узел не владеет никаким другим узлом.
-Однако эти трудности вызваны, скорее, нашим ограниченным представлением о том, чем связные списки *являются*.
+У нас были трудности при работе с двусвязными списками, поскольку у них сложная семантика владения: строго говоря, ни один узел не владеет никаким другим узлом.
+Однако эти трудности вызваны, скорее, нашим ограниченным представлением о том, чем *являются* связные списки.
 А именно, мы считаем, что все ссылки должны идти в одном и том же направлении.
 
-> Instead, we can smash our list into two halves: one going to the left, and one going to the right:
-
-Вместо этого мы можем разбить наш список на две половины: одна направлено влево, а вторая вправо:
+Вместо этого мы можем разбить наш список на две половины: одна направлена влево, а вторая вправо:
 
 ```rust ,ignore
 // lib.rs
@@ -30,15 +22,10 @@ struct List<T> {
 }
 ```
 
-> Now, rather than having a mere safe stack, we have a general purpose list.
-> We can grow the list leftwards or rightwards by pushing onto either stack.
-> We can also "walk" along the list by popping values off one end and onto the other.
-> To avoid needless allocations, we're going to copy the source of our safe Stack to get access to its private details:
-
 Теперь вместо обычного безопасного стека мы получили список общего назначения.
 Мы можем расширять список влево или вправо, добавляя значения в любой из стеков.
-Мы также можно «перемещаться» по списку, извлекая значения с одного конца и вставляя их в другой.
-Чтобы избежать ненужного выделения памяти, мы скопируем исходный код нашего безопасного стека, чтобы получить доступ к его приватным полям:
+Мы также можем «прокручивать» по списку, извлекая значения с одного конца и вставляя их в другой.
+Чтобы избежать ненужного выделения памяти, скопируем исходный код нашего безопасного стека, чтобы получить доступ к его приватным полям:
 
 
 ```rust ,ignore
@@ -98,8 +85,6 @@ impl<T> Drop for Stack<T> {
 }
 ```
 
-> And just rework `push` and `pop` a bit:
-
 И немного переработаем `push` и `pop`:
 
 ```rust ,ignore
@@ -131,7 +116,7 @@ fn pop_node(&mut self) -> Option<Box<Node<T>>> {
 }
 ```
 
-Теперь мы можем создать наш список:
+Теперь мы можем написать наш список:
 
 ```rust ,ignore
 pub struct List<T> {
@@ -146,9 +131,7 @@ impl<T> List<T> {
 }
 ```
 
-> And we can do the usual stuff:
-
-И мы можем выполнять над ним обычные операции:
+И выполнять над ним обычные операции:
 
 ```rust ,ignore
 pub fn push_left(&mut self, elem: T) { self.left.push(elem) }
@@ -161,9 +144,7 @@ pub fn peek_left_mut(&mut self) -> Option<&mut T> { self.left.peek_mut() }
 pub fn peek_right_mut(&mut self) -> Option<&mut T> { self.right.peek_mut() }
 ```
 
-> But most interestingly, we can walk around!
-
-Но, что гораздо интереснее, мы можем обойти его кругом!
+Но, что гораздо интереснее, мы можем его прокручивать!
 
 
 ```rust ,ignore
@@ -180,10 +161,7 @@ pub fn go_right(&mut self) -> bool {
 }
 ```
 
-> We return booleans here as just a convenience to indicate whether we actually managed to move.
-> Now let's test this baby out:
-
-Здесь мы возвращаем булевы значения просто для удобства, чтобы показать, действительно ли нам удалось переместиться по списку.
+Мы возвращаем булевы значения просто для удобства, чтобы показать, действительно ли нам удалось прокрутить список.
 Протестируем:
 
 ```rust ,ignore
@@ -249,14 +227,9 @@ test silly1::test::walk_aboot ... ok
 test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured
 ```
 
-> This is an extreme example of a *finger* data structure, where we maintain some kind of finger into the structure, and as a consequence can support operations on locations in time proportional to the distance from the finger.
+Перед нами — экстремальный пример структуры данных с *указателем* (*finger* data structure).
+Благодаря своеобразному указателю, структура позволяет выполнять операции над элементами за время, пропорциональное расстоянию до него.
 
-Это экстремальный пример структуры данных с *указателем* (*finger* data structure), в которой используется своего рода указатель, благодаря чему можно выполнять операции над элементами за время, пропорциональное расстоянию до указателя.
-
-> We can make very fast changes to the list around our finger, but if we want to make changes far away from our finger we have to walk all the way over there.
-> We can permanently walk over there by shifting the elements from one stack to the other, or we could just walk along the links with an `&mut` temporarily to do the changes.
-> However the `&mut` can never go back up the list, while our finger can!
-
-Можно очень быстро вносить изменения в список рядом с указателем, но если нам надо поправить список где-то далеко от указателя, нам придётся туда добраться.
-Мы можем либо идти по списку, перекладывая элементы из одного стека в другой, либо можем двигаться с помощью временного изменяемого итератора.
-Правда, итератор не позволит нам вернуться назад, в то время как указатель позволит!
+Можно быстро вносить изменения рядом с указателем, но если нам надо поправить список где-то далеко, туда придётся добраться.
+Можно либо идти по списку, перекладывая элементы из одного стека в другой, либо двигаться с помощью временного изменяемого итератора `&mut`.
+Но помните, итератор не позволит нам вернуться назад, в то время как указатель позволит!
